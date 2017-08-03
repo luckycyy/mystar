@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"time"
 	"github.com/gorilla/websocket"
-	"zhefan/music_controller"
+	"starroom/music_controller"
 )
 type GameStatus struct {
 	Step   int    //阶段
