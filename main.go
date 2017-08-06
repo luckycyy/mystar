@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"time"
 	"github.com/gorilla/websocket"
-	"starroom/music_controller"
+	"mystar/music_controller"
+	"io/ioutil"
+	"strings"
 )
 type GameStatus struct {
 	Step   int    //阶段
@@ -21,15 +23,23 @@ type BtnStatus struct {
 var currentStatus GameStatus
 var bs BtnStatus
 var conn *websocket.Conn
-
+func loadConf()string{//有问题
+	data, err := ioutil.ReadFile("conf/server.conf")
+	if err != nil {
+		fmt.Println("readConf error:", err)
+	}
+	log.Print("server_conf data:"+string(data))
+	server_path:=strings.Split(string(data),"=")[1]
+	return string(server_path)
+}
 func main() {
 	http.HandleFunc("/pt", PintuHandler)
 	http.HandleFunc("/set", ButtonHandler)
 	http.HandleFunc("/pass", PassHandler)
 	http.HandleFunc("/query", QueryHandler)
 	http.HandleFunc("/wsquery", WsQueryHandler)
-	http.Handle("/", http.FileServer(http.Dir("c:\\starroomTempServer\\")))
-	log.Print("server running")
+	http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
+	log.Print("server running.")
 	http.ListenAndServe(":5566", nil)
 }
 func PassHandler(w http.ResponseWriter, req *http.Request){
