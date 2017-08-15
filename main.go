@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"time"
 	"github.com/gorilla/websocket"
-	"starroom/music_controller"
+	"mystar/music_controller"
 	"io/ioutil"
 	"strings"
 )

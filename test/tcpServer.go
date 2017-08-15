@@ -7,6 +7,7 @@ import (
 
 	"net/http"
 	"log"
+    "encoding/json"
 )
 
 func recvConnMsg(conn net.Conn) {
@@ -20,40 +21,97 @@ func recvConnMsg(conn net.Conn) {
 		}
 		msg := string(buf[0:n])
 		fmt.Println("recv msg:", msg)
-		if msg == "" {
+        var newMsg Msg
+        if err:=json.Unmarshal([]byte(msg), newMsg);err!=nil{
+            log.Println("recv msg convert to json err")
+        }
 
-		}
-		conn.Write([]byte("Hi,I'm server!"))
+        if newMsg.From=="bind"{
+            p:=Player{Num:newMsg.Num,GloveNum:newMsg.GloveNum,Team:"blue"}
+            if !HasPlayer(players,p) {
+                players = append(players ,p )
+            }
+        }else if newMsg.From=="jhd" {
+            if newMsg.Num=="09"|| newMsg.Num=="10" {
+                SetTeamByJHD(newMsg.GloveNum,"red")
+            }else{
+                jhd:=GetJHDByNum(newMsg.Num)
+                player:=GetPlayerByGloveNum(newMsg.GloveNum)
+                if player.Team==jhd.Color {
+                    //逻辑处理
+                }
+            }
+
+        }else if newMsg.From=="zdf" {
+
+        }
+
 	}
 }
-
+func SetTeamByJHD(gloveNum string,team string){
+    for index,p := range players{
+        if p.GloveNum ==  gloveNum {
+            players[index].setTeam(team)
+            conn.Write([]byte("ZDF"+p.Num+"=0"))
+        }
+    }
+}
+func HasPlayer(players []Player,player Player) bool{
+    for _,p := range players{
+        if p.Num ==  player.Num {
+            return true
+        }
+    }
+    return false
+}
 type JHD struct {
-	Num      string //净化点编号
+	Num      string
 	Color    string
-	Active   bool //点亮，未点亮。受on off控制
+	Active   bool //受on off控制
 	Disabled bool //失效
 }
 type Player struct {
-	WxId     string //微信id
-	Num      string //衣服编号
-	GloveNum string //手套编号
+	WxId     string
+	Num      string
+	GloveNum string
 	Team     string
 	Status   string
 }
+func GetJHDByNum(num string) JHD{
+    for _,jhd:= range jhds{
+        if jhd.Num==num {
+            return jhd
+        }
+    }
+    return nil
+}
+func GetPlayerByGloveNum(gloveNum string) Player{
+    for _,player:= range players{
+        if player.GloveNum==gloveNum {
+            return player
+        }
+    }
+    return nil
+}
+func (player *Player)setTeam(team string){
+    player.Team=team
+}
 type Msg struct {
-	From     string //消息来自,ZDF战斗服 JHD净化点
+	From     string
 	Num      string //编号
-	GloveNum string //手套编号
+	GloveNum string
 	Status   string //on off
 }
 
 var jhds []JHD
 var players []Player
+var conn net.Conn
 func main() {
 
 	http.HandleFunc("/reset", ResetHandler)
-	http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
-	log.Print("server running.")
+    http.HandleFunc("/start", StartHandler)
+	//http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
+	log.Println("server running.")
 	http.ListenAndServe(":5568", nil)
 
 	listen_sock, err := net.Listen("tcp", "192.168.1.21:5567")
@@ -69,9 +127,37 @@ func main() {
 			continue
 		}
 		fmt.Println("conn ok")
-		go recvConnMsg(new_conn)
+        conn = new_conn
+		//go recvConnMsg(new_conn)
 	}
 
+}
+
+func StartHandler(w http.ResponseWriter, req *http.Request) {
+    log.Println("into StartHandler")
+    for _,player:= range players{
+        if player.Team=="red"{
+            conn.Write([]byte("ZDF"+player.Num+"=1"))
+        }else if player.Team=="blue" {
+            conn.Write([]byte("ZDF"+player.Num+"=2"))
+        }
+    }
+    InitJHD()
+    //发送JHD消息
+
+    fmt.Fprint(w, "start ok")
+    log.Printf("start ok")
+}
+func InitJHD(){
+    jhds = make([]JHD,8)
+    jhds=append(jhds,JHD{Num:"01",Color:"red"})
+    jhds=append(jhds,JHD{Num:"02",Color:"red"})
+    jhds=append(jhds,JHD{Num:"03",Color:"red"})
+    jhds=append(jhds,JHD{Num:"04",Color:"red"})
+    jhds=append(jhds,JHD{Num:"05",Color:"red"})
+    jhds=append(jhds,JHD{Num:"06",Color:"red"})
+    jhds=append(jhds,JHD{Num:"07",Color:"red"})
+    jhds=append(jhds,JHD{Num:"08",Color:"red"})
 }
 func ResetHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("into ResetHandler")
@@ -79,11 +165,9 @@ func ResetHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, "reset ok")
 	log.Printf("reset ok")
 }
+
 func ResetGameStatus() {
-	currentStatus.Step = 0
-	currentStatus.Status = "ready"
-	currentStatus.From = ""
-	currentStatus.To = ""
-	bs.ABtnStatus = ""
-	bs.BBtnStatus = ""
+    conn.Write([]byte("ZDF00=03"))
+    recvConnMsg(conn)
+
 }
