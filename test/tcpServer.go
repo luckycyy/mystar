@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"log"
     "encoding/json"
+    "time"
 )
 
 func recvConnMsg(conn net.Conn) {
@@ -34,12 +35,21 @@ func recvConnMsg(conn net.Conn) {
         }else if newMsg.From=="jhd" {
             if newMsg.Num=="09"|| newMsg.Num=="10" {
                 SetTeamByJHD(newMsg.GloveNum,"red")
-            }else{
+            }else {
                 jhd:=GetJHDByNum(newMsg.Num)
                 player:=GetPlayerByGloveNum(newMsg.GloveNum)
-                if player.Team==jhd.Color {
-                    //逻辑处理
+                if newMsg.Status=="on"{
+                    if player.Team!=jhd.Color {
+                        //开启timer
+                        t:=time.AfterFunc(5*time.Second,func(){ChangeJHDColor(jhd.Num,player.Num)})
+                        timerMap[player.Num]=t
+                    }
+                }else if newMsg.Status=="off"{
+                    t:=timerMap[player.Num]
+                    t.Stop()
+                    delete(timerMap,player.Num)
                 }
+
             }
 
         }else if newMsg.From=="zdf" {
@@ -47,6 +57,21 @@ func recvConnMsg(conn net.Conn) {
         }
 
 	}
+}
+func ChangeJHDColor(jhdNum string,playerNum string){
+    jhd:=GetJHDByNum(jhdNum)
+    if jhd.Color=="red" {
+        jhd.Color="blue"
+    }else if jhd.Color=="blue" {
+        jhd.Color="red"
+        CheckFinish()
+    }
+    delete(timerMap, playerNum)
+}
+func CheckFinish(){
+    for index,jhd :=range jhds{
+
+    }
 }
 func SetTeamByJHD(gloveNum string,team string){
     for index,p := range players{
@@ -77,10 +102,10 @@ type Player struct {
 	Team     string
 	Status   string
 }
-func GetJHDByNum(num string) JHD{
-    for _,jhd:= range jhds{
+func GetJHDByNum(num string) *JHD{
+    for index,jhd:= range jhds{
         if jhd.Num==num {
-            return jhd
+            return &jhds[index]
         }
     }
     return nil
@@ -106,6 +131,7 @@ type Msg struct {
 var jhds []JHD
 var players []Player
 var conn net.Conn
+var timerMap map[string] *time.Timer
 func main() {
 
 	http.HandleFunc("/reset", ResetHandler)
@@ -143,12 +169,12 @@ func StartHandler(w http.ResponseWriter, req *http.Request) {
         }
     }
     InitJHD()
-    //发送JHD消息
-
+    conn.Write([]byte("JHD00=1"))
     fmt.Fprint(w, "start ok")
     log.Printf("start ok")
 }
 func InitJHD(){
+    timerMap = make(map[string] *time.Timer)
     jhds = make([]JHD,8)
     jhds=append(jhds,JHD{Num:"01",Color:"red"})
     jhds=append(jhds,JHD{Num:"02",Color:"red"})
