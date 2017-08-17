@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-
 	"net/http"
 	"log"
 	"encoding/json"
@@ -17,11 +16,11 @@ func recvConnMsg(conn net.Conn) {
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
-			fmt.Println("conn closed")
+            log.Println("conn closed")
 			return
 		}
 		msg := string(buf[0:n])
-		fmt.Println("recv msg:", msg)
+        log.Println("recv msg:", msg)
 		var newMsg Msg
 		if err := json.Unmarshal([]byte(msg), newMsg); err != nil {
 			log.Println("recv msg convert to json err")
@@ -37,7 +36,10 @@ func recvConnMsg(conn net.Conn) {
 				SetTeamByJHD(newMsg.GloveNum, "red")
 			} else {
 				jhd := GetJHDByNum(newMsg.Num)
-				player := GetPlayerByGloveNum(newMsg.GloveNum)
+				player,exist:= GetPlayerByGloveNum(newMsg.GloveNum)
+                if !exist {
+                    log.Println("GetPlayerByGloveNum error")
+                }
 				if newMsg.Status == "on" {
 					if player.Dying {
 						t := zdfTimerMap[player.Num]
@@ -60,7 +62,10 @@ func recvConnMsg(conn net.Conn) {
 
 		} else if newMsg.From == "zdf" {
 			attackedPlayer := GetPlayerByNum(newMsg.Num)
-			attacker := GetPlayerByGloveNum(newMsg.GloveNum)
+			attacker ,exist:= GetPlayerByGloveNum(newMsg.GloveNum)
+            if !exist {
+                log.Println("GetPlayerByGloveNum error")
+            }
 			if (attackedPlayer.Team != attacker.Team) && attacker.Active {
 				if attackedPlayer.Team == "red" {
 					attackedPlayer.Active = false
@@ -174,13 +179,13 @@ func GetPlayerByNum(num string) *Player {
 	return nil
 }
 
-func GetPlayerByGloveNum(gloveNum string) Player {
+func GetPlayerByGloveNum(gloveNum string) (Player,bool) {
 	for _, player := range players {
 		if player.GloveNum == gloveNum {
-			return player
+			return player,true
 		}
 	}
-	return nil
+	return Player{},false
 }
 func (player *Player) setTeam(team string) {
 	player.Team = team
@@ -201,31 +206,32 @@ var zdfTimerMap map[string]*time.Timer
 
 func main() {
 
-	http.HandleFunc("/reset", ResetHandler)
-	http.HandleFunc("/start", StartHandler)
-	//http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
-	log.Println("server running.")
-	http.ListenAndServe(":5568", nil)
-
-	listen_sock, err := net.Listen("tcp", "192.168.1.21:5567")
+    go RunHttpApi()
+	listen_sock, err := net.Listen("tcp", "127.0.0.1:5567")
 	if err != nil {
-		fmt.Println("Error: %s", err.Error())
+		log.Println(err.Error())
 		os.Exit(1)
 	}
 	defer listen_sock.Close()
-	fmt.Println("tcp server running v2")
+    log.Println("tcp server running.listen:5567")
 	for {
 		new_conn, err := listen_sock.Accept()
 		if err != nil {
 			continue
 		}
-		fmt.Println("conn ok")
+        log.Println("conn ok")
 		conn = new_conn
 		//go recvConnMsg(new_conn)
 	}
 
 }
-
+func RunHttpApi(){
+    http.HandleFunc("/reset", ResetHandler)
+    http.HandleFunc("/start", StartHandler)
+    //http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
+    log.Println("http api server running.listen:5568")
+    http.ListenAndServe("127.0.0.1:5568", nil)
+}
 func StartHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("into StartHandler")
 	for _, player := range players {
@@ -239,7 +245,7 @@ func StartHandler(w http.ResponseWriter, req *http.Request) {
 	InitJHD()
 	conn.Write([]byte("JHD00=1"))
 	fmt.Fprint(w, "start ok")
-	log.Printf("start ok")
+	log.Println("start ok")
 }
 func InitTimerMap() {
 	jhdTimerMap = make(map[string]*time.Timer)
@@ -260,7 +266,7 @@ func ResetHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("into ResetHandler")
 	ResetGameStatus()
 	fmt.Fprint(w, "reset ok")
-	log.Printf("reset ok")
+	log.Println("reset ok")
 }
 
 func ResetGameStatus() {
