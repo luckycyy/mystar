@@ -8,6 +8,7 @@ import (
 	"log"
 	"encoding/json"
 	"time"
+	"strings"
 )
 
 func recvConnMsg(conn net.Conn) {
@@ -45,7 +46,7 @@ func recvConnMsg(conn net.Conn) {
 						t := zdfTimerMap[player.Num]
 						t.Stop()
 						delete(zdfTimerMap, player.Num)
-						conn.Write([]byte("ZDF" + player.Num + "=2"))
+						SendBroadcastMsg("ZDF" + player.Num + "=2\r\n")
 					}
 					if player.Team != jhd.Color {
 						//开启timer
@@ -69,7 +70,7 @@ func recvConnMsg(conn net.Conn) {
 			if (attackedPlayer.Team != attacker.Team) && attacker.Active {
 				if attackedPlayer.Team == "red" {
 					attackedPlayer.Active = false
-					conn.Write([]byte("ZDF" + attackedPlayer.Num + "=0"))
+					SendBroadcastMsg("ZDF" + attackedPlayer.Num + "=0\r\n")
 					if v, ok := zdfTimerMap[attackedPlayer.Num]; ok {
 						v.Stop()
 						delete(zdfTimerMap, attackedPlayer.Num)
@@ -78,7 +79,7 @@ func recvConnMsg(conn net.Conn) {
 					zdfTimerMap[attackedPlayer.Num] = t
 				} else if attackedPlayer.Team == "blue" {
 					attackedPlayer.Dying = true
-					conn.Write([]byte("ZDF" + attackedPlayer.Num + "=4"))
+					SendBroadcastMsg("ZDF" + attackedPlayer.Num + "=4\r\n")
 					t := time.AfterFunc(15*time.Second, func() { ChangeToRed(attackedPlayer.Num) })
 					zdfTimerMap[attackedPlayer.Num] = t
 				}
@@ -91,7 +92,7 @@ func ChangeToRed(playerNum string) {
 	player := GetPlayerByNum(playerNum)
 	player.Team = "red"
 	delete(zdfTimerMap, playerNum)
-	conn.Write([]byte("ZDF" + playerNum + "=1"))
+	SendBroadcastMsg("ZDF" + playerNum + "=1\r\n")
 	redWin := CheckRedWin()
 	if redWin {
 		//完成逻辑处理
@@ -109,7 +110,7 @@ func ReActive(playerNum string) {
 	player := GetPlayerByNum(playerNum)
 	player.Active = true
 	delete(zdfTimerMap, playerNum)
-	conn.Write([]byte("ZDF" + playerNum + "=1"))
+	SendBroadcastMsg("ZDF" + playerNum + "=1\r\n")
 }
 func ChangeJHDColor(jhdNum string, playerNum string) {
 	jhd := GetJHDByNum(jhdNum)
@@ -136,7 +137,7 @@ func SetTeamByJHD(gloveNum string, team string) {
 	for index, p := range players {
 		if p.GloveNum == gloveNum {
 			players[index].setTeam(team)
-			conn.Write([]byte("ZDF" + p.Num + "=0"))
+			SendBroadcastMsg("ZDF" + p.Num + "=0\r\n")
 		}
 	}
 }
@@ -200,12 +201,12 @@ type Msg struct {
 
 var jhds []JHD
 var players []Player
-var conn net.Conn
 var jhdTimerMap map[string]*time.Timer
 var zdfTimerMap map[string]*time.Timer
+var connPool map[string]net.Conn
 
 func main() {
-
+    connPool = make(map[string] net.Conn)
     go RunHttpApi()
 	listen_sock, err := net.Listen("tcp", "127.0.0.1:5567")
 	if err != nil {
@@ -219,9 +220,57 @@ func main() {
 		if err != nil {
 			continue
 		}
-        log.Println("conn ok")
-		conn = new_conn
-		//go recvConnMsg(new_conn)
+		clientIP:=strings.Split(new_conn.RemoteAddr().String(),":")[0]
+		SaveToConnPool(clientIP,new_conn)
+        log.Println("save conn to pool ok")
+	}
+
+}
+func SaveToConnPool(clientIP string,conn net.Conn){
+	log.Println("SaveToConnPool,clientIP=" +clientIP)
+	switch clientIP {
+	case "192.168.1.72":
+		connPool["JHD"]=conn
+	case "192.168.1.201":
+		connPool["ZDF01"]=conn
+	case "192.168.1.202":
+		connPool["ZDF02"]=conn
+	case "192.168.1.203":
+		connPool["ZDF03"]=conn
+	case "192.168.1.204":
+		connPool["ZDF04"]=conn
+	case "192.168.1.205":
+		connPool["ZDF05"]=conn
+	case "192.168.1.206":
+		connPool["ZDF06"]=conn
+	case "192.168.1.207":
+		connPool["ZDF07"]=conn
+	case "192.168.1.208":
+		connPool["ZDF08"]=conn
+	case "192.168.1.209":
+		connPool["ZDF09"]=conn
+	case "192.168.1.210":
+		connPool["ZDF10"]=conn
+	case "192.168.1.211":
+		connPool["ZDF11"]=conn
+	case "192.168.1.212":
+		connPool["ZDF12"]=conn
+	case "192.168.1.213":
+		connPool["ZDF13"]=conn
+	case "192.168.1.214":
+		connPool["ZDF14"]=conn
+	case "192.168.1.215":
+		connPool["ZDF15"]=conn
+	case "192.168.1.216":
+		connPool["ZDF16"]=conn
+	case "192.168.1.217":
+		connPool["ZDF17"]=conn
+	case "192.168.1.218":
+		connPool["ZDF18"]=conn
+	case "192.168.1.219":
+		connPool["ZDF19"]=conn
+	case "192.168.1.220":
+		connPool["ZDF20"]=conn
 	}
 
 }
@@ -236,14 +285,14 @@ func StartHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("into StartHandler")
 	for _, player := range players {
 		if player.Team == "red" {
-			conn.Write([]byte("ZDF" + player.Num + "=1"))
+			SendBroadcastMsg("ZDF" + player.Num + "=1\r\n")
 		} else if player.Team == "blue" {
-			conn.Write([]byte("ZDF" + player.Num + "=2"))
+			SendBroadcastMsg("ZDF" + player.Num + "=2\r\n")
 		}
 	}
 	InitTimerMap()
 	InitJHD()
-	conn.Write([]byte("JHD00=1"))
+	SendBroadcastMsg("JHD00=1\r\n")
 	fmt.Fprint(w, "start ok")
 	log.Println("start ok")
 }
@@ -270,7 +319,15 @@ func ResetHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func ResetGameStatus() {
-	conn.Write([]byte("ZDF00=03"))
-	recvConnMsg(conn)
-
+	connPool=make(map[string] net.Conn)
+	for _,c := range connPool {
+		c.Write([]byte("ZDF00=03\r\n"))
+		go recvConnMsg(c)
+	}
+}
+func SendBroadcastMsg(msg string){
+	log.Println("sendBroad:"+msg)
+	for _,c := range connPool {
+		c.Write([]byte(msg))
+	}
 }
