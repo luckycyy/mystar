@@ -1,4 +1,4 @@
-package main
+package other
 
 import (
 	"fmt"
@@ -275,11 +275,11 @@ func SaveToConnPool(clientIP string,conn net.Conn){
 
 }
 func RunHttpApi(){
-    http.HandleFunc("/reset", ResetHandler)
-    http.HandleFunc("/start", StartHandler)
-    //http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
-    log.Println("http api server running.listen:5568")
-    http.ListenAndServe("127.0.0.1:5568", nil)
+	http.HandleFunc("/reset", ResetHandler)
+	http.HandleFunc("/start", StartHandler)
+	//http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
+	log.Println("http api server running.listen:5568")
+	http.ListenAndServe("127.0.0.1:5568", nil)
 }
 func StartHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("into StartHandler")
