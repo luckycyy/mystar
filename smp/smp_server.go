@@ -216,10 +216,10 @@ func recvMsg(clientIP string, conn net.Conn) {
 				if !lockFlag {
 					lockFlag = true
 					lockPlayer = newMsg.GloveNum
-					log.Println("open lock")
+					openLockEvent()
 				} else if lockFlag && (!doorFlag) && (lockPlayer != newMsg.GloveNum) {
 					doorFlag = true
-					log.Println("open door")
+					openDoorEvent()
 				}
 
 			} else {
@@ -245,6 +245,7 @@ func recvMsg(clientIP string, conn net.Conn) {
 							myConnPool.remove(zdfAddress[player.Num])
 						}
 					} else if player.Team != jhd.Color {
+						touchJHDEvent()
 						log.Println("playerTeam!=jhdColor,team:" + player.Team + ",color:" + jhd.Color)
 						//开启timer
 						t := time.AfterFunc(5*time.Second, func() { ChangeJHDColor(jhd.Num, player.Num) })
@@ -266,6 +267,7 @@ func recvMsg(clientIP string, conn net.Conn) {
 			if (attackedPlayer.Team != attacker.Team) && attacker.Active {
 				conn, _ := myConnPool.get(zdfAddress[attackedPlayer.Num])
 				if attackedPlayer.Team == "red" {
+					redAttackedEvent()
 					attackedPlayer.Active = false
 					_, err := conn.Write([]byte("ZDF" + attackedPlayer.Num + "=0\r\n"))
 					if err != nil {
@@ -278,6 +280,7 @@ func recvMsg(clientIP string, conn net.Conn) {
 					t := time.AfterFunc(15*time.Second, func() { ReActive(attackedPlayer.Num) })
 					zdfTimerMap[attackedPlayer.Num] = t
 				} else if attackedPlayer.Team == "blue" {
+					blueAttackedEvent()
 					attackedPlayer.Dying = true
 					_, err := conn.Write([]byte("ZDF" + attackedPlayer.Num + "=4\r\n"))
 					if err != nil {
@@ -373,6 +376,7 @@ func GetPlayerByNum(num string) *Player {
 }
 
 func ChangeToRed(playerNum string) {
+	BianYiEvent()
 	player := GetPlayerByNum(playerNum)
 	player.Team = "red"
 	if _, ok := zdfTimerMap[player.Num]; ok {
@@ -384,6 +388,7 @@ func ChangeToRed(playerNum string) {
 	if redWin {
 		//完成逻辑处理
 		log.Println("red win")
+		redWinEvent()
 	}
 }
 
@@ -406,12 +411,14 @@ func ChangeJHDColor(jhdNum string, playerNum string) {
 	jhd.Color = player.Team
 	conn, _ := myConnPool.get(jdfAddress)
 	if jhd.Color == "red" {
+		JHDChangeRedEvent()
 		_, err := conn.Write([]byte("JHD" + jhd.Num + "=1\r\n"))
 		if err != nil {
 			myConnPool.remove(jdfAddress)
 		}
 		log.Println("JHD" + jhd.Num + "=1")
 	} else if jhd.Color == "blue" {
+		JHDChangeBlueEvent()
 		_, err := conn.Write([]byte("JHD" + jhd.Num + "=2\r\n"))
 		if err != nil {
 			myConnPool.remove(jdfAddress)
@@ -421,6 +428,7 @@ func ChangeJHDColor(jhdNum string, playerNum string) {
 		if blueWin {
 			//完成逻辑处理
 			log.Println("blue win")
+			blueWinEvent()
 		}
 	}
 	if _, ok := jhdTimerMap[playerNum]; ok {
@@ -444,4 +452,89 @@ func CheckRedWin() bool {
 		}
 	}
 	return true
+}
+func openLockEvent() {
+	log.Println("openlock event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E7%8E%A9%E5%AE%B6%E4%B8%80%E5%88%B7%E5%8D%A1%E5%BC%80%E5%9C%86%E9%97%A8&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+
+
+func openDoorEvent() {
+	log.Println("opendoor event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E7%8E%A9%E5%AE%B6%E4%BA%8C%E5%88%B7%E5%8D%A1%E5%BC%80%E5%8D%B7%E5%B8%98%E9%97%A8&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+
+func touchJHDEvent(){
+	log.Println("touchJHD event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E5%87%80%E5%8C%96%E7%82%B9%E8%A2%AB%E8%A7%A6%E6%91%B8&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+
+func JHDChangeBlueEvent(){
+	log.Println("changeBlue event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E5%87%80%E5%8C%96%E7%82%B9%E5%87%80%E5%8C%96%E4%B8%BA%E8%93%9D%E8%89%B2&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+
+func JHDChangeRedEvent(){
+	log.Println("changeRed event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E5%87%80%E5%8C%96%E7%82%B9%E5%87%80%E5%8C%96%E4%B8%BA%E7%BA%A2%E8%89%B2&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+func redAttackedEvent(){
+	log.Println("redattackted event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E7%BA%A2%E6%96%B9%E7%8E%A9%E5%AE%B6%E8%A2%AB%E5%87%BB%E4%B8%AD&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+func blueAttackedEvent(){
+	log.Println("blueattackted event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E8%93%9D%E6%96%B9%E7%8E%A9%E5%AE%B6%E8%A2%AB%E5%87%BB%E4%B8%AD&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+func BianYiEvent(){
+	log.Println("bianyi event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E8%93%9D%E6%96%B9%E7%8E%A9%E5%AE%B6%E5%8F%98%E5%BC%82&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+func redWinEvent(){
+	log.Println("redwin event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E7%BA%A2%E6%96%B9%E8%83%9C%E5%88%A9&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+func blueWinEvent(){
+	log.Println("bluewin event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E8%93%9D%E6%96%B9%E8%83%9C%E5%88%A9&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
 }
