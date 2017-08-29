@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="renderer" content="webkit">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection,email=no" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="stylesheet" href="static/css/base.css" />
+	<link rel="stylesheet" href="static/css/components.css" />
+	<link rel="stylesheet" href="static/css/gate.css" />
+	<title>L方向</title>
+	<script src="static/js/common/device.js"></script>
+</head>
+<body style="background:#333">
+	<div id="indexApp" class="leftGate">
+		<div class="flex">
+			<img src="static/images/left/head.png" alt="" class="col-10"/>
+			<div class="left-body">
+				<div class="rotate-box" v-for="item in boxList" @click="rotate(item)" :class="{'KO':KO}">
+					<img :src="item.url" alt="" :class="{'rt90':item.curStatus==1,'rt180':item.curStatus==2,'rt270':item.curStatus==3,'rt360':item.curStatus==4||item.curStatus===0}"/>
+				</div>
+			</div>
+			<img src="static/images/left/bottom.png" alt="" class="col-10"/>
+		</div>
+	</div>
+	<script src="static/js/vue/vue.min.js"></script>
+	<script src="static/js/vue/vue-resource.min.js"></script>
+	<script src="static/js/common/vue.prompt.js"></script>
+	<script>
+		var timestamp = new Date().getTime();
+		Vue.http.options.emulateJSON = true;
+		var indexApp=new Vue({
+			el:"#indexApp",
+			data:{
+				KO:false,
+				boxList:[
+					{url:'static/images/2_4.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/0_4.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/2_4.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/2_3.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/2_1.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/1_2.png',targetStatus:[0,2],curStatus:0},
+					{url:'static/images/2_2.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/1_1.png',targetStatus:[0,2],curStatus:0},
+					{url:'static/images/2_4.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/1_2.png',targetStatus:[0,2],curStatus:0},
+					{url:'static/images/1_2.png',targetStatus:[0,2],curStatus:0},
+					{url:'static/images/2_2.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/2_1.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/1_2.png',targetStatus:[0,2],curStatus:0},
+					{url:'static/images/1_2.png',targetStatus:[0,2],curStatus:0},
+					{url:'static/images/0_4.png',targetStatus:[0],curStatus:0}
+				],
+			},
+			mounted: function(){
+				var $this = this;
+//				$this.$http.post("../course/indexCourse",{"timestamp":timestamp})
+//                    .then(function(response) {
+//                        var result = response.body;
+//                        if(result.meta.success === true){
+//
+//                        }
+//                  })
+				for(var i=0;i<this.boxList.length;i++){
+					this.boxList[i].curStatus=Math.floor(Math.random()*4);
+				}
+			},
+			methods:{
+				jumpTo:function(path){
+					window.location.href=path+".html";
+				},
+				rotate:function(item){
+					var $this=this;
+					if(!this.KO){
+						item.curStatus++;
+						if(item.curStatus==4){
+							item.curStatus=0;
+						}
+						if(this.checkAnswer()){
+							setTimeout(function(){
+								$this.KO=true;
+								
+							},100)
+							setTimeout(function(){
+							 $this.$http.get("http://192.168.1.21:5566/pt?player=left")
+								.then(function(response) {
+									var result = response.body;
+									console.log(result)
+								})
+								$platformprompt.prompt('您已过关！')
+							},2100)
+						};
+					}else{
+						
+					}
+				},
+				checkAnswer:function(){
+					for(var i=0;i<this.boxList.length;i++){
+						if(this.boxList[i].targetStatus.indexOf(this.boxList[i].curStatus)==-1){
+							console.log(this.boxList[i].targetStatus+' '+this.boxList[i].curStatus)
+							return false;
+						}
+					}
+					return true;
+				}
+			}
+		});
+	</script>
+</body>
+</html>

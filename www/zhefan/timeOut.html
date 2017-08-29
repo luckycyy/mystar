@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="renderer" content="webkit">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection,email=no" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="stylesheet" href="static/css/base.css" />
+	<link rel="stylesheet" href="static/css/run.css" />
+	<link rel="stylesheet" href="static/css/components.css" /
+	<title>折返跑</title>
+	<script src="static/js/common/device.js"></script>
+	<style>
+		.readyInfo{
+			position:absolute;
+			top:20%;
+			left:50%;
+			transform:translate(-50%,-50%);
+			padding:.3rem .4rem;
+			background:rgba(0,0,0,.8);
+			border-radius:15px;
+			text-align:center;
+			line-height:1.2rem;
+			color:#fff;
+			font-size:1rem;
+		}
+	
+	</style>
+</head>
+<body>
+	<div id="runApp">
+		<transition name="fade">
+			<div class='readyInfo' v-show="showReady" v-cloak>准 备</div>
+		</transition>
+		<div class="clock">
+			{{(min<10?'0':'')+min+'.'+(sec<10?'0':'')+sec+' s'}}
+		</div>
+	</div>
+	<script src="static/js/vue/vue.min.js"></script>
+	<script src="static/js/vue/vue-resource.min.js"></script>
+	<script src="static/js/common/vue.prompt.js"></script>
+	<script>
+		var timestamp = new Date().getTime();
+		Vue.http.options.emulateJSON = true;
+		var runApp=new Vue({
+			el:"#runApp",
+			data:{
+				From:"",
+				To:"",
+				Step:"",
+				Status:"",
+				showReady:true,
+				min:0,
+				sec:0,
+				timer:null,
+				runningBtn:null,//哪个按钮在激活中
+				msg:'准备',
+			},
+			//初始化
+			mounted: function(){
+				var $this = this;
+				/*
+				$this.$http.post("http://192.168.1.21:5566/reset",{"timestamp":timestamp})
+                    .then(function(response) {
+                        var result = response.body;
+							console.dir(result)
+                  })
+				 */
+				$this.min=0;
+				$this.sec=15;
+			},
+			methods:{
+				//按按钮
+				pushBtn:function(btnFlag){
+					var $this=this;
+					//点击A按钮
+					if(btnFlag==='A'&&$this.runningBtn!=='A'){
+						if($this.Step==1){
+							alert('你成功了！');
+							if($this.timer){
+								clearInterval($this.timer);
+								$this.timer=null;
+							}
+							return;
+						}
+						//重置清空计时器
+						if($this.timer){
+							clearInterval($this.timer);
+							$this.timer=null;
+						}
+						$this.runningBtn='A';
+						$this.$http.post("http://192.168.1.21:5566/set?aBtn=true",{"timestamp":timestamp})
+							.then(function(response) {
+								var result = response;
+								console.dir(result.body)
+								console.dir('A已点击！')
+							})
+						//计时器开始
+						if($this.Step!='end'){
+							$this.count();
+						}
+					}else if(btnFlag==='B'&&$this.runningBtn!=='B'){//点击按钮
+						$this.runningBtn='B';
+						//重置清空计时器
+						if($this.timer){
+							clearInterval($this.timer);
+							$this.timer=null;
+						}
+						$this.$http.post("http://192.168.1.21:5566/set?bBtn=true",{"timestamp":timestamp})
+								.then(function(response) {
+									var result = response;
+									console.dir(result.body)
+									console.dir('B已点击！')
+								})
+						//计时器开始
+						if($this.Step!='end'){
+							$this.count();
+						}
+					}
+
+				},
+				//查询状态
+				queryStatus:function(){
+					var $this=this;
+					$this.$http.post("http://192.168.1.21:5566/query",{"timestamp":timestamp})
+							.then(function(response) {
+								var result = JSON.parse(response.body);
+								$this.ABtnStatus=result.ABtnStatus;
+								$this.BBtnStatus=result.BBtnStatus;
+								$this.Step=result.Step;
+								console.log('A: '+$this.ABtnStatus)
+								console.log('B: '+$this.BBtnStatus)
+								console.log('Step: '+$this.Step)
+							})
+				},
+				//倒计时 初始5分钟
+				count:function(){
+					let $this=this;
+					$this.countInit();
+					$this.timer=setInterval(function(){
+						if($this.min==0&&$this.sec==0){
+							$this.timeOut();
+							clearInterval($this.timer);
+							return;
+						}
+						$this.sec--;
+						if($this.sec==-1){
+							($this.sec=59);
+							if($this.min>=1){$this.min--};
+						}
+					},16)
+				},
+				countInit:function(){
+					let $this=this;
+					if($this.Step=="1"||$this.Step=="0")
+					    $this.min=16;
+					else if($this.Step=="2")
+					    $this.min=13;
+					else if($this.Step=="3")
+					    $this.min=10;
+					$this.sec=0;
+					if($this.timer){
+						clearInterval($this.timer);
+						$this.timer=null;
+					}
+				},
+				timeOut:function(){
+					var $this=this;
+					$platformprompt.prompt('修复失败！');
+					ws.send("failed");
+				},
+			}
+		});
+		ws = new WebSocket("ws://192.168.1.21:5566/wsquery");
+		ws.onopen = function(evt) {
+			console.log("conn ok")
+		}
+		ws.onmessage = function(evt) {
+			
+			runApp.From=JSON.parse(evt.data).From;
+			runApp.To=JSON.parse(evt.data).To;
+			runApp.Step=JSON.parse(evt.data).Step;
+			runApp.Status=JSON.parse(evt.data).Status;
+			console.dir(evt.data);
+			if(runApp.Status=='ready'){
+				runApp.showReady=true;
+				runApp.countInit();
+			}
+			if(runApp.Status=='start'){
+				runApp.showReady=false;
+				$platformprompt.prompt('请前往'+runApp.To+'点修复！');
+				setTimeout(function(){
+					runApp.count();//计时器开始
+				},1)
+			}
+			if(runApp.Status=='end'){
+				$platformprompt.prompt('修复成功！');
+				if(runApp.timer){
+					clearInterval(runApp.timer);
+					runApp.timer=null;
+				}
+				setTimeout(function(){
+					history.go(-1);
+				},2000);
+			}
+			//重置清空计时器
+			if(runApp.timer){
+				clearInterval(runApp.timer);
+				runApp.timer=null;
+			}
+		}
+	</script>
+</body>
+</html>

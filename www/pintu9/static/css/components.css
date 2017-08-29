@@ -1,0 +1,47 @@
+.popUpModal{
+	position:fixed;
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	background-color:rgba(0,0,0,.8);
+	z-index:10000;
+}
+.modalPanel{
+	width:300px;
+	background-color:#fafafa;
+	position:absolute;
+	left:50%;
+	top:50%;
+	transform:translate(-50%,-50%);
+	border-radius:10px;
+	text-align:center;
+	overflow:hidden;
+	box-sizing:border-box;
+}
+.modalBody{
+	padding:10px;
+}
+.modalTitle,.modalFooter{
+	background-color:#f0f0f0;
+	display:flex;
+	justify-content:space-around;
+	position:relative;
+	padding:.2rem 0;
+}
+.modalFooter{
+	padding:0;
+}
+.modalBtn{
+	padding:5px;
+	width:100px;
+}
+.cutLine{
+	position:absolute;
+	left:50%;
+	top:50%;
+	transform:translate(-50%,-50%);
+	height:25px;
+	width:1px;
+	background-color:#dfdfdf;
+}
