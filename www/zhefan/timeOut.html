@@ -175,7 +175,14 @@
 		});
 		ws = new WebSocket("ws://192.168.1.21:5566/wsquery");
 		ws.onopen = function(evt) {
-			console.log("conn ok")
+			console.log("conn ok");
+			
+		}
+		ws.onclose = function(evt) {
+			console.log("close ok");
+			setTimeout(function(){
+				history.go(-1);
+			},2000);
 		}
 		ws.onmessage = function(evt) {
 			
@@ -201,9 +208,11 @@
 					clearInterval(runApp.timer);
 					runApp.timer=null;
 				}
+				/*
 				setTimeout(function(){
 					history.go(-1);
 				},2000);
+				*/
 			}
 			//重置清空计时器
 			if(runApp.timer){

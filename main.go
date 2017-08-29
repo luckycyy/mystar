@@ -35,6 +35,7 @@ func loadConf()string{//有问题
 func main() {
 	http.HandleFunc("/pt", PintuHandler)
 	http.HandleFunc("/set", ButtonHandler)
+	http.HandleFunc("/reset", ResetHandler)
 	http.HandleFunc("/pass", PassHandler)
 	http.HandleFunc("/query", QueryHandler)
 	http.HandleFunc("/wsquery", WsQueryHandler)
@@ -93,8 +94,9 @@ func ButtonHandler(w http.ResponseWriter, req *http.Request) {
 					} else if currentStatus.Step == 4 {
 						currentStatus.Status = "end"
 						sendCurrentStatus()
-						time.Sleep(4 * time.Second)
 						music_controller.PlayFinish()
+						conn.Close()
+						log.Println("conn close")
 						return
 					}
 					reverseDestination()
@@ -129,8 +131,9 @@ func ButtonHandler(w http.ResponseWriter, req *http.Request) {
 					if currentStatus.Step == 4 {
 						currentStatus.Status = "end"
 						sendCurrentStatus()
-						time.Sleep(4 * time.Second)
 						music_controller.PlayFinish()
+						conn.Close()
+						log.Println("conn close")
 						return
 					} else {
 						currentStatus.Status = "ready"

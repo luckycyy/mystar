@@ -1,0 +1,44 @@
+dati1.html
+<<html>
+<head>
+	<script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+	</script>
+</head>
+<body background="static/images/bg.png" style=" background-repeat:no-repeat ;
+background-size:100% 100%;
+background-attachment: fixed;"
+>
+<div style="width: 100%" align="center">
+
+	<div id="b4" class="group2" style="width:800px; height:220px; background:url(static/images/2A.png);" ></div>
+	<div id="b5" class="group2" style="width:800px; height:220px; background:url(static/images/2B.png);" ></div>
+	<div id="b6" class="group2" style="width:800px; height:220px; background:url(static/images/2C.png);" ></div>
+
+	<div id="loading" class="loading" style="width:75%; height:160px; background:url(static/images/loading.png);" ></div>
+</div>
+<script>
+    var step=1
+    $(function(){
+
+
+        $("#b4").click(function(){
+            $.get("http://192.168.1.21:5566/dati?v=2false",function(data,status){
+            });
+            history.go(-1);
+        })
+        $("#b5").click(function(){
+            $.get("http://192.168.1.21:5566/dati?v=2true",function(data,status){
+            });
+			history.go(-1);
+        })
+        $("#b6").click(function(){
+            $.get("http://192.168.1.21:5566/dati?v=2false",function(data,status){
+            });
+            history.go(-1);
+        })
+
+    });
+
+</script>
+</body>
+</html>

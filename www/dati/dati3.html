@@ -1,0 +1,39 @@
+
+<<html>
+<head>
+	<script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+	</script>
+</head>
+<body background="static/images/bg.png" style=" background-repeat:no-repeat ;
+background-size:100% 100%;
+background-attachment: fixed;"
+>
+<div style="width: 100%" align="center">
+
+	<div id="b7" class="group3" style="width:800px; height:220px; background:url(static/images/3A.png);" ></div>
+	<div id="b8" class="group3" style="width:800px; height:220px; background:url(static/images/3B.png);" ></div>
+	<div id="b9" class="group3" style="width:800px; height:220px; background:url(static/images/3C.png);" ></div>
+	<div id="loading" class="loading" style="width:75%; height:160px; background:url(static/images/loading.png);" ></div>
+</div>
+<script>
+    $(function(){
+        $("#b7").click(function(){
+            $.get("http://192.168.1.21:5566/dati?v=3false",function(data,status){
+            });
+            history.go(-1);
+        })
+        $("#b8").click(function(){
+            $.get("http://192.168.1.21:5566/dati?v=3true",function(data,status){
+            });
+			history.go(-1);
+        })
+        $("#b9").click(function(){
+            $.get("http://192.168.1.21:5566/dati?v=3false",function(data,status){
+            });
+            history.go(-1);
+        })
+    });
+
+</script>
+</body>
+</html>
