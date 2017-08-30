@@ -98,7 +98,10 @@
 			runApp.rotate(runApp.curBtn);
 			
 		}
-		
+        ws.onclose = function(evt) {
+            console.log("conn close")
+            history.go(-1);
+        }
 		
 	</script>
 </body>
