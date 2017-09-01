@@ -1,0 +1,118 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+    </script>
+</head>
+<body>
+<div>
+    <button id="reset" type="button">重置游戏</button>
+    <button id="start" type="button">开始战斗</button>
+</div>
+<div>
+    在线战斗服：
+    <div id="onlineZDFs">
+    </div>
+</div>
+<div>
+    玩家状态：
+    <div id="players">
+    </div>
+</div>
+<div>
+    发送指令：接收者<select id="receiver">
+    <option value="01">01</option>
+    <option value="02">02</option>
+    <option value="03">03</option>
+    <option value="04">04</option>
+    <option value="05">05</option>
+    <option value="06">06</option>
+    <option value="07">07</option>
+    <option value="08">08</option>
+    <option value="09">09</option>
+    <option value="10">10</option>
+    <option value="11">11</option>
+    <option value="12">12</option>
+    <option value="13">13</option>
+    <option value="14">14</option>
+    <option value="15">15</option>
+    <option value="16">16</option>
+    <option value="17">17</option>
+    <option value="18">18</option>
+    <option value="19">19</option>
+    <option value="20">20</option>
+    <option value="00">全部战斗服</option>
+</select>
+
+
+    指令码 <select id="cmd">
+    <option value="1">红色</option>
+    <option value="2">蓝色</option>
+    <option value="3">绑定模式</option>
+    <option value="4">4</option>
+</select>
+
+    <button id="send" type="button">发送</button>
+
+</div>
+<script>
+    $("#reset").click(function () {
+        $.get("http://192.168.1.21:5568/reset", function (data) {
+            alert('重置成功')
+        });
+    })
+    $("#start").click(function () {
+        $.get("http://192.168.1.21:5568/start", function (data) {
+            alert('开始战斗')
+        });
+    })
+    $("#send").click(function () {
+        var to = $("#receiver").val()
+        var v = $("#cmd").val()
+        $.get("http://192.168.1.21:5568/send?to=" + to + "&k=ZDF" + to + "&v=" + v, function (data) {
+            console.log(data)
+			if(data=="setok"){
+				alert('操作成功')
+			}
+        });
+    })
+
+    
+    $(function () {
+        setInterval(function () {
+
+            $.get("http://192.168.1.21:5568/query?v=onlineZDF", function (data) {
+                var onlineZDFs = new Set()
+                jsonData = JSON.parse(data)
+                $("#onlineZDFs").empty()
+                for (var k in jsonData) {
+                    if (k == "192.168.1.72") {
+                        continue;
+                    }
+                    var num = k.substring(k.lastIndexOf(".") + 2)
+                    onlineZDFs.add(num)
+                    $("#onlineZDFs").append(num+",")
+                }
+
+                $.get("http://192.168.1.21:5568/query?v=players", function (data) {
+                    jsonPlayers = JSON.parse(data)
+
+                    for (var i = 0; i < jsonPlayers.length; i++) {
+                        var connStat
+                        if (onlineZDFs.has(jsonPlayers[i].Num)) {
+                            connStat = "在线"
+                        } else {
+                            connStat = "离线"
+                        }
+                        $("#players").append("战斗服:" + ppp[i].Num + ",手套:" + ppp[i].GloveNum + ",队伍:" + ppp[i].Team + "连接状态:" + connStat + "<br>")
+                    }
+                });
+                //var play = '[{"Num":"08","GloveNum":"0009650874","Team":"blue","Active":true,"Dying":false},{"Num":"11","GloveNum":"0009817617","Team":"red","Active":true,"Dying":false}]'
+            });
+        }, 3000)
+    });
+
+
+</script>
+</body>
+</html>

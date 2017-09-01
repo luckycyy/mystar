@@ -107,20 +107,46 @@ func runHttpApi() {
 	http.HandleFunc("/send", sendHandler)
 	http.HandleFunc("/reset", resetHandler)
 	http.HandleFunc("/start", startHandler)
-	//http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
+	http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
 	log.Println("http api server running.listen:5568")
 	http.ListenAndServe(serverIP+":5568", nil)
 }
 func queryHandler(w http.ResponseWriter, req *http.Request) {
+	req.ParseForm()
+	myConnPool.sendBroadcast("hi")
+
+	if len(req.Form["v"]) > 0 {
+		v:=string(req.Form["v"][0])
+
+		if v=="players"{
+			jsonData,err:=json.Marshal(players)
+			if  err != nil {
+				log.Println(err)
+				return
+			}
+			fmt.Fprint(w,string(jsonData))
+		}else if v=="onlineZDF" {
+			jsonData,err:=json.Marshal(myConnPool.Pool)
+			if  err != nil {
+				log.Println(err)
+				return
+			}
+			fmt.Fprint(w,string(jsonData))
+		}
+		return
+	}
+
 	log.Println("players:")
 	log.Println(players)
+
 	log.Println("jhds:")
 	log.Println(jhds)
 	log.Println("jhdTimerMap:")
 	log.Println(jhdTimerMap)
 	log.Println("zdfTimerMap:")
 	log.Println(zdfTimerMap)
-	myConnPool.sendBroadcast("hi")
+
+
 	log.Println("Pool:")
 	log.Println(myConnPool.Pool)
 
@@ -139,6 +165,12 @@ func sendHandler(w http.ResponseWriter, req *http.Request) {
 			log.Println("send msg failed!")
 		}
 
+		if v=="1"{
+			ChangeToRed(to)
+		}else if v=="2"{
+			ChangeToBlue(to)
+		}
+		fmt.Fprint(w,"setok")
 	}
 }
 
@@ -162,6 +194,9 @@ func startHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println(players)
 	for _, player := range players {
 		conn, _ := myConnPool.get(zdfAddress[player.Num])
+		if conn == nil{
+			continue //如果连接池中找不到玩家的连接 就跳过这个玩家
+		}
 		log.Println("to:" + conn.RemoteAddr().String())
 		if player.Team == "red" {
 			_, err := conn.Write([]byte("ZDF" + player.Num + "=1\r\n"))
@@ -391,7 +426,15 @@ func ChangeToRed(playerNum string) {
 		redWinEvent()
 	}
 }
-
+func ChangeToBlue(playerNum string) {
+	player := GetPlayerByNum(playerNum)
+	player.Team = "blue"
+	if _, ok := zdfTimerMap[player.Num]; ok {
+		delete(zdfTimerMap, playerNum)
+	}
+	conn, _ := myConnPool.get(zdfAddress[playerNum])
+	conn.Write([]byte("ZDF" + playerNum + "=2\r\n"))
+}
 func ReActive(playerNum string) {
 	player := GetPlayerByNum(playerNum)
 	player.Active = true
