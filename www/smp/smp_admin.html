@@ -20,7 +20,7 @@
     </div>
 </div>
 <div>
-    发送指令：接收者<select id="receiver">
+    战斗服控制：接收者<select id="receiver">
     <option value="01">01</option>
     <option value="02">02</option>
     <option value="03">03</option>
@@ -44,17 +44,58 @@
     <option value="00">全部战斗服</option>
 </select>
 
-
     指令码 <select id="cmd">
+    <option value="0">待机模式</option>
     <option value="1">红色</option>
     <option value="2">蓝色</option>
     <option value="3">绑定模式</option>
-    <option value="4">4</option>
+    <option value="4">爆闪模式</option>
+    <option value="5">变异模式</option>
+    <option value="6">七彩变色</option>
+    <option value="7">红色呼吸</option>
+    <option value="8">绿色呼吸</option>
+    <option value="9">蓝色呼吸</option>
+
 </select>
 
-    <button id="send" type="button">发送</button>
+    <button id="send" type="button">发送指令码</button>
+
+    队伍 <select id="team">
+    <option value="red">红队</option>
+    <option value="blue">蓝队</option>
+    </select>
+    <button id="setTeam" type="button">设置队伍</button>
+</div>
+
+
+
+
+<div>
+    净化点控制：接收者<select id="receiver2">
+    <option value="01">01</option>
+    <option value="02">02</option>
+    <option value="03">03</option>
+    <option value="04">04</option>
+    <option value="05">05</option>
+    <option value="06">06</option>
+    <option value="07">07</option>
+    <option value="08">08</option>
+    <option value="09">09</option>
+    <option value="10">10</option>
+    <option value="00">全部净化点</option>
+</select>
+
+    指令码 <select id="cmd2">
+    <option value="0">待机模式</option>
+    <option value="1">红色</option>
+    <option value="2">蓝色</option>
+
+</select>
+
+    <button id="send2" type="button">发送指令码</button>
 
 </div>
+
 <script>
     $("#reset").click(function () {
         $.get("http://192.168.1.21:5568/reset", function (data) {
@@ -77,7 +118,27 @@
         });
     })
 
-    
+    $("#setTeam").click(function () {
+        var to = $("#receiver").val()
+        var v = $("#team").val()
+        $.get("http://192.168.1.21:5568/setTeam?player=" + to + "&team=" + v, function (data) {
+            console.log(data)
+            if(data=="setok"){
+                alert('操作成功')
+            }
+        });
+    })
+
+    $("#send2").click(function () {
+        var to = $("#receiver2").val()
+        var v = $("#cmd2").val()
+        $.get("http://192.168.1.21:5568/setJHD?jhdNum=" + to + "&cmd=" + v, function (data) {
+            console.log(data)
+            if(data=="setok"){
+                alert('操作成功')
+            }
+        });
+    })
     $(function () {
         setInterval(function () {
 
@@ -96,7 +157,7 @@
 
                 $.get("http://192.168.1.21:5568/query?v=players", function (data) {
                     jsonPlayers = JSON.parse(data)
-
+                    $("#players").empty()
                     for (var i = 0; i < jsonPlayers.length; i++) {
                         var connStat
                         if (onlineZDFs.has(jsonPlayers[i].Num)) {
@@ -104,7 +165,7 @@
                         } else {
                             connStat = "离线"
                         }
-                        $("#players").append("战斗服:" + ppp[i].Num + ",手套:" + ppp[i].GloveNum + ",队伍:" + ppp[i].Team + "连接状态:" + connStat + "<br>")
+                        $("#players").append("战斗服:" + jsonPlayers[i].Num + ",手套:" + jsonPlayers[i].GloveNum + ",队伍:" + jsonPlayers[i].Team + "连接状态:" + connStat + "<br>")
                     }
                 });
                 //var play = '[{"Num":"08","GloveNum":"0009650874","Team":"blue","Active":true,"Dying":false},{"Num":"11","GloveNum":"0009817617","Team":"red","Active":true,"Dying":false}]'

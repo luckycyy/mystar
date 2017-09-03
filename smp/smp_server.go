@@ -32,7 +32,9 @@ func (connPool *ConnPool) sendBroadcast(msg string) {
 	}
 }
 func BroadcastThread(key string, conn net.Conn, msg string) {
-	log.Println("write msg:" + msg + " to " + key)
+	if msg!="hi"{
+		log.Println("write msg:" + msg + " to " + key)
+	}
 	if _, err := conn.Write([]byte(msg)); err != nil {
 		log.Println(err.Error())
 		myConnPool.remove(key)
@@ -103,8 +105,11 @@ func main() {
 	}
 }
 func runHttpApi() {
+
 	http.HandleFunc("/query", queryHandler)
 	http.HandleFunc("/send", sendHandler)
+	http.HandleFunc("/setTeam", setTeamHandler)
+	http.HandleFunc("/setJHD", setJHDHandler)
 	http.HandleFunc("/reset", resetHandler)
 	http.HandleFunc("/start", startHandler)
 	http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
@@ -146,7 +151,6 @@ func queryHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("zdfTimerMap:")
 	log.Println(zdfTimerMap)
 
-
 	log.Println("Pool:")
 	log.Println(myConnPool.Pool)
 
@@ -158,11 +162,15 @@ func sendHandler(w http.ResponseWriter, req *http.Request) {
 		k := string(req.Form["k"][0])
 		v := string(req.Form["v"][0])
 		msg := k + "=" + v + "\r\n"
-		conn, _ := myConnPool.get(zdfAddress[to])
-		_, err := conn.Write([]byte(msg))
-		log.Println("msg is:" + msg)
-		if err != nil {
-			log.Println("send msg failed!")
+		if to=="00"{
+			myConnPool.sendBroadcast(msg)
+		}else{
+			conn, _ := myConnPool.get(zdfAddress[to])
+			_, err := conn.Write([]byte(msg))
+			log.Println("msg is:" + msg)
+			if err != nil {
+				log.Println("send msg failed!")
+			}
 		}
 
 		if v=="1"{
@@ -174,6 +182,37 @@ func sendHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func setTeamHandler(w http.ResponseWriter, req *http.Request) {
+	req.ParseForm()
+	if (len(req.Form["player"]) > 0 ) && ( len(req.Form["team"]) > 0) {
+		playerNum := string(req.Form["player"][0])
+		team := string(req.Form["team"][0])
+		player := GetPlayerByNum(playerNum)
+		player.Team = team
+		fmt.Fprint(w,"setok")
+	}
+}
+func setJHDHandler(w http.ResponseWriter, req *http.Request) {
+	req.ParseForm()
+	if (len(req.Form["jhdNum"]) > 0 ) && ( len(req.Form["cmd"]) > 0) {
+		jhdNum := string(req.Form["jhdNum"][0])
+		cmd := string(req.Form["cmd"][0])
+
+		conn, _ := myConnPool.get(jdfAddress)
+		_, err := conn.Write([]byte("JHD" + jhdNum + "="+cmd+"\r\n"))
+		if err != nil {
+			myConnPool.remove(jdfAddress)
+		}
+		jhd := GetJHDByNum(jhdNum)
+		if cmd=="1"{
+			jhd.Color = "red"
+		}else if cmd=="2"{
+			jhd.Color = "blue"
+		}
+
+		log.Println("JHD" + jhdNum + "="+cmd)
+	}
+}
 //先开机再reset
 func resetHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("into ResetHandler")
@@ -270,6 +309,7 @@ func recvMsg(clientIP string, conn net.Conn) {
 					if player.Dying {
 						log.Println("player.dying")
 						player.Dying = false
+						BlueReLiveEvent()
 						if v, ok := zdfTimerMap[player.Num]; ok {
 							v.Stop()
 							delete(zdfTimerMap, player.Num)
@@ -279,9 +319,9 @@ func recvMsg(clientIP string, conn net.Conn) {
 						if err != nil {
 							myConnPool.remove(zdfAddress[player.Num])
 						}
-					} else if player.Team != jhd.Color {
+					} else if player.Active {
 						touchJHDEvent()
-						log.Println("playerTeam!=jhdColor,team:" + player.Team + ",color:" + jhd.Color)
+						log.Println("player.Active is true:" + player.Team + ",color:" + jhd.Color)
 						//开启timer
 						t := time.AfterFunc(5*time.Second, func() { ChangeJHDColor(jhd.Num, player.Num) })
 						jhdTimerMap[player.Num] = t
@@ -298,6 +338,7 @@ func recvMsg(clientIP string, conn net.Conn) {
 			attacker, exist := GetPlayerByGloveNum(newMsg.GloveNum)
 			if !exist {
 				log.Println("GetPlayerByGloveNum err")
+				return
 			}
 			if (attackedPlayer.Team != attacker.Team) && attacker.Active {
 				conn, _ := myConnPool.get(zdfAddress[attackedPlayer.Num])
@@ -317,7 +358,7 @@ func recvMsg(clientIP string, conn net.Conn) {
 				} else if attackedPlayer.Team == "blue" {
 					blueAttackedEvent()
 					attackedPlayer.Dying = true
-					_, err := conn.Write([]byte("ZDF" + attackedPlayer.Num + "=4\r\n"))
+					_, err := conn.Write([]byte("ZDF" + attackedPlayer.Num + "=5\r\n"))
 					if err != nil {
 						myConnPool.remove(zdfAddress[attackedPlayer.Num])
 					}
@@ -441,6 +482,7 @@ func ReActive(playerNum string) {
 	if _, ok := zdfTimerMap[playerNum]; ok {
 		delete(zdfTimerMap, playerNum)
 	}
+	RedReActiveEvent()
 	conn, _ := myConnPool.get(zdfAddress[playerNum])
 	_, err := conn.Write([]byte("ZDF" + playerNum + "=1\r\n"))
 	if err != nil {
@@ -451,21 +493,27 @@ func ChangeJHDColor(jhdNum string, playerNum string) {
 	log.Println("jhdNum:" + jhdNum + " playerNum:" + playerNum)
 	jhd := GetJHDByNum(jhdNum)
 	player := GetPlayerByNum(playerNum)
-	jhd.Color = player.Team
+
 	conn, _ := myConnPool.get(jdfAddress)
-	if jhd.Color == "red" {
+	if player.Team == "red" {
 		JHDChangeRedEvent()
 		_, err := conn.Write([]byte("JHD" + jhd.Num + "=1\r\n"))
 		if err != nil {
+			log.Println("JHD" + jhd.Num + " send msg err")
 			myConnPool.remove(jdfAddress)
+			return
 		}
+		jhd.Color = player.Team
 		log.Println("JHD" + jhd.Num + "=1")
-	} else if jhd.Color == "blue" {
+	} else if player.Team == "blue" {
 		JHDChangeBlueEvent()
 		_, err := conn.Write([]byte("JHD" + jhd.Num + "=2\r\n"))
 		if err != nil {
+			log.Println("JHD" + jhd.Num + " send msg err")
 			myConnPool.remove(jdfAddress)
+			return
 		}
+		jhd.Color = player.Team
 		log.Println("JHD" + jhd.Num + "=2")
 		blueWin := CheckBlueWin()
 		if blueWin {
@@ -576,6 +624,22 @@ func redWinEvent(){
 func blueWinEvent(){
 	log.Println("bluewin event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E8%93%9D%E6%96%B9%E8%83%9C%E5%88%A9&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+func BlueReLiveEvent(){
+	log.Println("BlueReLive event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E8%93%9D%E6%96%B9%E6%B2%BB%E7%96%97%E6%88%90%E5%8A%9F&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
+func RedReActiveEvent(){
+	log.Println("RedReActive event")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E7%BA%A2%E6%96%B9%E9%87%8D%E7%94%9F&user_action=true")
 	if err != nil {
 		print(err)
 	}
