@@ -1,0 +1,62 @@
+
+<<html>
+<head>
+	<script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+	</script>
+</head>
+<body background="static/images/bg2.gif" style=" background-repeat:no-repeat ;
+background-size:100% 100%;
+background-attachment: fixed;"
+>
+<div style="width: 100%" align="center">
+	<img id="kt21"  src="static/images/k21.png" style="display:none;position: absolute;left: 25%;top: 9%" ></img>
+	<img id="kt22"  src="static/images/k22.png" style="display:none;position: absolute;left: 43%;top: 52%"  ></img>
+	<img id="kt23"  src="static/images/k23.png"  style="display:none;position: absolute;left: 76%;top: 27%" ></img>
+	<img id="failed"  src="static/images/failed.gif"  style="display:none;position: absolute;left: 0%;top: 0%;width: 100%;height: 100%;z-index: 999" ></img>
+	<img id="success"  src="static/images/success.gif"  style="display:none;position: absolute;left: 0%;top: 0%;width: 100%;height: 100%;z-index: 999" ></img>
+
+</div>
+<script>
+
+
+    ws = new WebSocket("ws://192.168.1.21:5571/ws");
+    ws.onopen = function(evt) {
+        console.log("conn ok")
+        ws.send("kangti2")
+    }
+    ws.onmessage = function(evt) {
+        console.log(evt.data)
+
+        if(evt.data=="21"){
+            $("#kt21").show();
+        }
+        if(evt.data=="22"){
+            $("#kt22").show();
+        }
+        if(evt.data=="23"){
+            $("#kt23").show();
+        }
+
+        if(evt.data=="2f"){
+            $("#failed").show();
+            setTimeout(function(){
+                $("#failed").hide();
+            },5000)
+        }
+        if(evt.data=="success"){
+            $("#success").show();
+        }
+        if(evt.data=="reload"){
+            console.log("reload")
+            location.reload();
+        }
+
+    }
+    ws.onclose = function(evt) {
+        console.log("conn close")
+        location.reload();
+    }
+
+</script>
+</body>
+</html>

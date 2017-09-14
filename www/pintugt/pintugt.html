@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="renderer" content="webkit">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection,email=no" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="stylesheet" href="static/css/base.css" />
+	<link rel="stylesheet" href="static/css/gate.css" />
+	<title>寂静岭</title>
+	<script src="static/js/common/device.js"></script>
+</head>
+<body>
+	<div id="runApp">
+			<div class="rotate-body">
+					<img class="rotate-box" v-for="(item,index) in boxList" @click="" :src="item.url" alt="" :class="{'rt90':item.curStatus==1,'rt180':item.curStatus==2,'rt270':item.curStatus==3,'rt360':item.curStatus==4||item.curStatus===0}"/>
+			</div>
+	</div>
+	<script src="static/js/vue/vue.min.js"></script>
+	<script src="static/js/vue/vue-resource.min.js"></script>
+	<script>
+		var timestamp = new Date().getTime();
+		Vue.http.options.emulateJSON = true;
+		var runApp=new Vue({
+			el:"#runApp",
+			data:{
+				KO:false,
+				boxList:[
+					{url:'static/images/1.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/2.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/3.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/4.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/5.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/6.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/7.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/8.png',targetStatus:[0],curStatus:0},
+					{url:'static/images/9.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/10.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/11.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/12.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/13.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/14.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/15.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/16.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/17.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/18.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/19.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/20.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/21.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/22.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/23.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/24.png',targetStatus:[0],curStatus:0},
+                    {url:'static/images/25.png',targetStatus:[0],curStatus:0},
+				],
+				curBtn:-1,
+			},
+			mounted: function(){
+				var $this = this;
+//				$this.$http.post("../course/indexCourse",{"timestamp":timestamp})
+//                    .then(function(response) {
+//                        var result = response.body;
+//                        if(result.meta.success === true){
+//
+//                        }
+//                  })
+				for(var i=0;i<this.boxList.length;i++){
+					this.boxList[i].curStatus=Math.floor(Math.random()*4);
+				}
+			},
+			methods:{
+				jumpTo:function(path){
+					window.location.href=path+".html";
+				},
+				rotate:function(index){
+					var $this=this;
+					if(!this.KO){
+						$this.boxList[index].curStatus++;
+						if($this.boxList[index].curStatus==4){
+							$this.boxList[index].curStatus=0;
+						}
+						if(this.checkAnswer()){
+							setTimeout(function(){
+								$this.KO=true;
+								ws.send("success");
+								console.log("success")
+							},100)
+						};
+					}
+				},
+				checkAnswer:function(){
+					for(var i=0;i<this.boxList.length;i++){
+						if(this.boxList[i].targetStatus.indexOf(this.boxList[i].curStatus)==-1){
+							console.log(this.boxList[i].targetStatus+' '+this.boxList[i].curStatus)
+							return false;
+						}
+					}
+					return true;
+				}
+			},
+			
+		});
+		
+		//{"btn":"1"}
+		ws = new WebSocket("ws://192.168.1.21:5570/wsquery");
+		ws.onopen = function(evt) {
+			console.log("conn ok")
+		}
+		ws.onmessage = function(evt) {
+			console.log(evt.data)
+			runApp.curBtn=JSON.parse(evt.data).Btn;
+			console.dir(evt.data);
+			runApp.rotate(runApp.curBtn);
+			
+		}
+        ws.onclose = function(evt) {
+            console.log("conn close")
+            history.go(-1);
+        }
+		
+	</script>
+</body>
+</html>

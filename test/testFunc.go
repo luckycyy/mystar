@@ -1,40 +1,22 @@
 package main
 
 import (
-	"net"
-
-	"os"
-	"time"
 	"log"
 )
-var tm map[string]*time.Timer
-var cm map[string]net.Conn
+type Bike struct {
+	Name string
+	Age int
+}
+var bikes []Bike
 func main() {
-	listen_sock, err := net.Listen("tcp", "127.0.0.1:5567")
-	if err != nil {
-		log.Println(err.Error())
-		os.Exit(1)
-	}
-	defer listen_sock.Close()
-	log.Println("tcp server running.listen:5567")
-	for {
-		//192.168.1.201-220 zdf
-		//192.168.1.72 JHD
-		new_conn, err := listen_sock.Accept()
-		if err != nil {
-			continue
+	bikes=append(bikes,Bike{Name:"aaa",Age:15})
+	bikes=append(bikes,Bike{Name:"bbb",Age:15})
+	bikes=append(bikes,Bike{Name:"ccc",Age:15})
+	for k, v := range bikes {
+		if v.Name == "bbb" {
+			kk := k + 1
+			bikes = append(bikes[:k], bikes[kk:]...)
 		}
-		//new_conn.Write([]byte("bbbbb"))
-		cm=make(map[string]net.Conn)
-		cm["aaa"]=new_conn
-		for _,v := range cm {
-			v.Write([]byte("cccc"))
-		}
-
-
-
-		log.Println("wrte finish")
-
-		//go recvConnMsg(new_conn)
 	}
+	log.Println(bikes)
 }

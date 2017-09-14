@@ -32,7 +32,7 @@ func (connPool *ConnPool) sendBroadcast(msg string) {
 	}
 }
 func BroadcastThread(key string, conn net.Conn, msg string) {
-	if msg!="hi"{
+	if msg != "hi" {
 		log.Println("write msg:" + msg + " to " + key)
 	}
 	if _, err := conn.Write([]byte(msg)); err != nil {
@@ -92,7 +92,7 @@ func main() {
 	myConnPool = NewConnPool()
 	go runHttpApi()
 	listener, _ := net.Listen("tcp", serverIP+":5567")
-	log.Println("tcp server running.listen:5567")
+	log.Println("tcp server running.listen:5567...")
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -111,6 +111,7 @@ func runHttpApi() {
 	http.HandleFunc("/setTeam", setTeamHandler)
 	http.HandleFunc("/setJHD", setJHDHandler)
 	http.HandleFunc("/reset", resetHandler)
+	http.HandleFunc("/resetNotRebind", resetNotRebindHandler)
 	http.HandleFunc("/start", startHandler)
 	http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
 	log.Println("http api server running.listen:5568")
@@ -121,22 +122,22 @@ func queryHandler(w http.ResponseWriter, req *http.Request) {
 	myConnPool.sendBroadcast("hi")
 
 	if len(req.Form["v"]) > 0 {
-		v:=string(req.Form["v"][0])
+		v := string(req.Form["v"][0])
 
-		if v=="players"{
-			jsonData,err:=json.Marshal(players)
-			if  err != nil {
+		if v == "players" {
+			jsonData, err := json.Marshal(players)
+			if err != nil {
 				log.Println(err)
 				return
 			}
-			fmt.Fprint(w,string(jsonData))
-		}else if v=="onlineZDF" {
-			jsonData,err:=json.Marshal(myConnPool.Pool)
-			if  err != nil {
+			fmt.Fprint(w, string(jsonData))
+		} else if v == "onlineZDF" {
+			jsonData, err := json.Marshal(myConnPool.Pool)
+			if err != nil {
 				log.Println(err)
 				return
 			}
-			fmt.Fprint(w,string(jsonData))
+			fmt.Fprint(w, string(jsonData))
 		}
 		return
 	}
@@ -162,9 +163,9 @@ func sendHandler(w http.ResponseWriter, req *http.Request) {
 		k := string(req.Form["k"][0])
 		v := string(req.Form["v"][0])
 		msg := k + "=" + v + "\r\n"
-		if to=="00"{
+		if to == "00" {
 			myConnPool.sendBroadcast(msg)
-		}else{
+		} else {
 			conn, _ := myConnPool.get(zdfAddress[to])
 			_, err := conn.Write([]byte(msg))
 			log.Println("msg is:" + msg)
@@ -173,12 +174,12 @@ func sendHandler(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 
-		if v=="1"{
+		if v == "1" {
 			ChangeToRed(to)
-		}else if v=="2"{
+		} else if v == "2" {
 			ChangeToBlue(to)
 		}
-		fmt.Fprint(w,"setok")
+		fmt.Fprint(w, "setok")
 	}
 }
 
@@ -189,7 +190,7 @@ func setTeamHandler(w http.ResponseWriter, req *http.Request) {
 		team := string(req.Form["team"][0])
 		player := GetPlayerByNum(playerNum)
 		player.Team = team
-		fmt.Fprint(w,"setok")
+		fmt.Fprint(w, "setok")
 	}
 }
 func setJHDHandler(w http.ResponseWriter, req *http.Request) {
@@ -199,25 +200,42 @@ func setJHDHandler(w http.ResponseWriter, req *http.Request) {
 		cmd := string(req.Form["cmd"][0])
 
 		conn, _ := myConnPool.get(jdfAddress)
-		_, err := conn.Write([]byte("JHD" + jhdNum + "="+cmd+"\r\n"))
+		_, err := conn.Write([]byte("JHD" + jhdNum + "=" + cmd + "\r\n"))
 		if err != nil {
 			myConnPool.remove(jdfAddress)
 		}
 		jhd := GetJHDByNum(jhdNum)
-		if cmd=="1"{
+		if cmd == "1" {
 			jhd.Color = "red"
-		}else if cmd=="2"{
+		} else if cmd == "2" {
 			jhd.Color = "blue"
 		}
 
-		log.Println("JHD" + jhdNum + "="+cmd)
+		log.Println("JHD" + jhdNum + "=" + cmd)
 	}
 }
+
 //先开机再reset
 func resetHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("into ResetHandler")
 	myConnPool.sendBroadcast("ZDF00=3\r\n")
 	players = []Player{}
+	InitJHD()
+	InitTimerMap()
+	InitZDFAddress()
+	lockFlag = false
+	doorFlag = false
+	lockPlayer = ""
+	fmt.Fprint(w, "reset ok")
+	log.Println("reset ok")
+}
+func resetNotRebindHandler(w http.ResponseWriter, req *http.Request) {
+	log.Println("into ResetNotRebindHandler")
+	myConnPool.sendBroadcast("ZDF00=0\r\n")
+	for index, p := range players {
+		players[index].setTeam("blue")
+		log.Println("player num:" + p.Num + " setTeam:" + "blue")
+	}
 	InitJHD()
 	InitTimerMap()
 	InitZDFAddress()
@@ -233,7 +251,7 @@ func startHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println(players)
 	for _, player := range players {
 		conn, _ := myConnPool.get(zdfAddress[player.Num])
-		if conn == nil{
+		if conn == nil {
 			continue //如果连接池中找不到玩家的连接 就跳过这个玩家
 		}
 		log.Println("to:" + conn.RemoteAddr().String())
@@ -271,12 +289,19 @@ func recvMsg(clientIP string, conn net.Conn) {
 		if err := json.Unmarshal([]byte(msg), &newMsg); err != nil {
 			log.Println("recv msg convert to json err")
 		}
-		if newMsg.From == "bind" {
+		if newMsg.From == "bind" && newMsg.Status == "on" {
 			p := Player{Num: newMsg.Num, GloveNum: newMsg.GloveNum, Team: "blue", Active: true}
-			if !HasPlayer(players, p) {
-				players = append(players, p)
-				log.Println("append:" + p.Num + " to players")
+			if HasPlayer(players, p) {
+				for k, v := range players {
+					if v.Num == p.Num {
+						kk := k + 1
+						players = append(players[:k], players[kk:]...)
+					}
+				}
+				log.Println("delete old player info")
 			}
+			players = append(players, p)
+			log.Println("append:" + p.Num + " to players")
 			conn, _ := myConnPool.get(zdfAddress[p.Num])
 			_, err := conn.Write([]byte("ZDF" + p.Num + "=0\r\n"))
 			if err != nil {
@@ -304,6 +329,7 @@ func recvMsg(clientIP string, conn net.Conn) {
 				log.Println(jhd)
 				if !exist {
 					log.Println("GetPlayerByGloveNum err")
+					return
 				}
 				if newMsg.Status == "on" {
 					if player.Dying {
@@ -553,7 +579,6 @@ func openLockEvent() {
 	resp.Body.Close()
 }
 
-
 func openDoorEvent() {
 	log.Println("opendoor event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E7%8E%A9%E5%AE%B6%E4%BA%8C%E5%88%B7%E5%8D%A1%E5%BC%80%E5%8D%B7%E5%B8%98%E9%97%A8&user_action=true")
@@ -563,7 +588,7 @@ func openDoorEvent() {
 	resp.Body.Close()
 }
 
-func touchJHDEvent(){
+func touchJHDEvent() {
 	log.Println("touchJHD event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E5%87%80%E5%8C%96%E7%82%B9%E8%A2%AB%E8%A7%A6%E6%91%B8&user_action=true")
 	if err != nil {
@@ -572,7 +597,7 @@ func touchJHDEvent(){
 	resp.Body.Close()
 }
 
-func JHDChangeBlueEvent(){
+func JHDChangeBlueEvent() {
 	log.Println("changeBlue event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E5%87%80%E5%8C%96%E7%82%B9%E5%87%80%E5%8C%96%E4%B8%BA%E8%93%9D%E8%89%B2&user_action=true")
 	if err != nil {
@@ -581,7 +606,7 @@ func JHDChangeBlueEvent(){
 	resp.Body.Close()
 }
 
-func JHDChangeRedEvent(){
+func JHDChangeRedEvent() {
 	log.Println("changeRed event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E5%87%80%E5%8C%96%E7%82%B9%E5%87%80%E5%8C%96%E4%B8%BA%E7%BA%A2%E8%89%B2&user_action=true")
 	if err != nil {
@@ -589,7 +614,7 @@ func JHDChangeRedEvent(){
 	}
 	resp.Body.Close()
 }
-func redAttackedEvent(){
+func redAttackedEvent() {
 	log.Println("redattackted event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E7%BA%A2%E6%96%B9%E7%8E%A9%E5%AE%B6%E8%A2%AB%E5%87%BB%E4%B8%AD&user_action=true")
 	if err != nil {
@@ -597,7 +622,7 @@ func redAttackedEvent(){
 	}
 	resp.Body.Close()
 }
-func blueAttackedEvent(){
+func blueAttackedEvent() {
 	log.Println("blueattackted event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E8%93%9D%E6%96%B9%E7%8E%A9%E5%AE%B6%E8%A2%AB%E5%87%BB%E4%B8%AD&user_action=true")
 	if err != nil {
@@ -605,7 +630,7 @@ func blueAttackedEvent(){
 	}
 	resp.Body.Close()
 }
-func BianYiEvent(){
+func BianYiEvent() {
 	log.Println("bianyi event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E8%93%9D%E6%96%B9%E7%8E%A9%E5%AE%B6%E5%8F%98%E5%BC%82&user_action=true")
 	if err != nil {
@@ -613,7 +638,7 @@ func BianYiEvent(){
 	}
 	resp.Body.Close()
 }
-func redWinEvent(){
+func redWinEvent() {
 	log.Println("redwin event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E7%BA%A2%E6%96%B9%E8%83%9C%E5%88%A9&user_action=true")
 	if err != nil {
@@ -621,7 +646,7 @@ func redWinEvent(){
 	}
 	resp.Body.Close()
 }
-func blueWinEvent(){
+func blueWinEvent() {
 	log.Println("bluewin event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E8%93%9D%E6%96%B9%E8%83%9C%E5%88%A9&user_action=true")
 	if err != nil {
@@ -629,7 +654,7 @@ func blueWinEvent(){
 	}
 	resp.Body.Close()
 }
-func BlueReLiveEvent(){
+func BlueReLiveEvent() {
 	log.Println("BlueReLive event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E8%93%9D%E6%96%B9%E6%B2%BB%E7%96%97%E6%88%90%E5%8A%9F&user_action=true")
 	if err != nil {
@@ -637,7 +662,7 @@ func BlueReLiveEvent(){
 	}
 	resp.Body.Close()
 }
-func RedReActiveEvent(){
+func RedReActiveEvent() {
 	log.Println("RedReActive event")
 	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.48&group=action_st&st=%E7%BA%A2%E6%96%B9%E9%87%8D%E7%94%9F&user_action=true")
 	if err != nil {

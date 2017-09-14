@@ -7,6 +7,8 @@
 <body>
 <div>
     <button id="reset" type="button">重置游戏</button>
+
+    <button id="resetNotRebind" type="button">重置不重绑</button>
     <button id="start" type="button">开始战斗</button>
 </div>
 <div>
@@ -99,6 +101,11 @@
 <script>
     $("#reset").click(function () {
         $.get("http://192.168.1.21:5568/reset", function (data) {
+            alert('重置成功')
+        });
+    })
+    $("#resetNotRebind").click(function () {
+        $.get("http://192.168.1.21:5568/resetNotRebind", function (data) {
             alert('重置成功')
         });
     })

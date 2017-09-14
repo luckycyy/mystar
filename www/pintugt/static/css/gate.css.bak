@@ -1,0 +1,38 @@
+.col-10{width:100%;flex:1}
+body{
+	background:url('../images/bg.png') #333;
+	background-size:100% 100%;
+}
+.rotate-body{
+	box-sizing:border-box;
+	width:54%;
+	padding:20px;
+	position:fixed;
+	top:50%;
+	left:50%;
+	transform:translate(-50%,-50%);
+	overflow:hidden;
+	background-size:100% 100%;
+}
+.flex{
+	display:flex;
+	flex-direction: column;
+	position:absolute;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+}
+.rotate-box{
+	box-sizing: border-box;
+	position:relative;
+	float:left;
+	width:33.3%;
+	padding:0px;
+	background-size:100% 100%;
+	transition:all .3s;
+}
+.rt90{transform: rotate(90deg)!important;}
+.rt180{transform: rotate(180deg)!important;}
+.rt270{transform: rotate(270deg)!important;}
+.rt360{transform: rotate(360deg)!important;}
