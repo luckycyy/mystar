@@ -5,11 +5,11 @@ body{
 }
 .rotate-body{
 	box-sizing:border-box;
-	width:50%;
+	width:53%;
 	padding:20px;
 	position:fixed;
 	top:50%;
-	left:30%;
+	left:29%;
 	transform:translate(-50%,-50%);
 	overflow:hidden;
 	background-size:100% 100%;
@@ -24,11 +24,12 @@ body{
 	bottom:0;
 }
 .rotate-box{
+
 	box-sizing: border-box;
 	position:relative;
 	float:left;
-	width:19%;
-	padding:2px;
+	width:20%;
+	padding:4px;
 	background-size:100% 100%;
 	transition:all .3s;
 }

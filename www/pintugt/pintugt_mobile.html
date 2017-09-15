@@ -1,61 +1,49 @@
 
 <<html>
 <head>
+	<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0" />
 	<script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
 	</script>
 </head>
-<body background="static/images/mobile.png" style=" background-repeat:no-repeat ;
-background-size:100% 100%;
-background-attachment: fixed;"
->
-<div style="position:absolute;width: 90%;top: 20%" align="center">
-	<img id="b1"  src="static/images/btn.png" style="" ></img>
-	<img id="b2"  src="static/images/btn.png" style="" ></img>
-	<img id="b3"  src="static/images/btn.png" style="" ></img>
-	<img id="b4"  src="static/images/btn.png" style="" ></img>
-	<img id="b5"  src="static/images/btn.png" style="" ></img>
-	<img id="b6"  src="static/images/btn.png" style="" ></img>
-	<img id="b7"  src="static/images/btn.png" style="" ></img>
-	<img id="b8"  src="static/images/btn.png" style="" ></img>
-	<img id="b9"  src="static/images/btn.png" style="" ></img>
-	<img id="b10"  src="static/images/btn.png" style="" ></img>
-	<img id="b11"  src="static/images/btn.png" style="" ></img>
-	<img id="b12"  src="static/images/btn.png" style="" ></img>
-	<img id="b13"  src="static/images/btn.png" style="" ></img>
-	<img id="b14"  src="static/images/btn.png" style="" ></img>
-	<img id="b15"  src="static/images/btn.png" style="" ></img>
-	<img id="b16"  src="static/images/btn.png" style="" ></img>
-	<img id="b17"  src="static/images/btn.png" style="" ></img>
-	<img id="b18"  src="static/images/btn.png" style="" ></img>
-	<img id="b19"  src="static/images/btn.png" style="" ></img>
-	<img id="b20"  src="static/images/btn.png" style="" ></img>
-	<img id="b21"  src="static/images/btn.png" style="" ></img>
-	<img id="b22"  src="static/images/btn.png" style="" ></img>
-	<img id="b23"  src="static/images/btn.png" style="" ></img>
-	<img id="b24"  src="static/images/btn.png" style="" ></img>
-	<img id="b25"  src="static/images/btn.png" style="" ></img>
+<style>
+	img {
+		width:17%;
+	}
+</style>
+<body background="static/images/mobile.png" style="text-align:center;width: 100%;background-repeat:no-repeat ;background-size:100% ;background-attachment: fixed;">
+
+<div  style="margin:28% auto;width: 87%;" >
+	<img id="b1" onclick="send(1)"  src="static/images/btn.png" ></img>
+	<img id="b2" onclick="send(2)" src="static/images/btn.png" ></img>
+	<img id="b3" onclick="send(3)" src="static/images/btn.png" ></img>
+	<img id="b4" onclick="send(4)" src="static/images/btn.png" ></img>
+	<img id="b5" onclick="send(5)" src="static/images/btn.png" ></img>
+	<img id="b6" onclick="send(6)" src="static/images/btn.png" ></img>
+	<img id="b7" onclick="send(7)" src="static/images/btn.png" ></img>
+	<img id="b8" onclick="send(8)" src="static/images/btn.png" ></img>
+	<img id="b9" onclick="send(9)" src="static/images/btn.png" ></img>
+	<img id="b10" onclick="send(10)" src="static/images/btn.png" ></img>
+	<img id="b11" onclick="send(11)" src="static/images/btn.png" ></img>
+	<img id="b12" onclick="send(12)" src="static/images/btn.png" ></img>
+	<img id="b13" onclick="send(13)" src="static/images/btn.png" ></img>
+	<img id="b14" onclick="send(14)" src="static/images/btn.png" ></img>
+	<img id="b15" onclick="send(15)" src="static/images/btn.png" ></img>
+	<img id="b16" onclick="send(16)" src="static/images/btn.png" ></img>
+	<img id="b17" onclick="send(17)" src="static/images/btn.png" ></img>
+	<img id="b18" onclick="send(18)" src="static/images/btn.png" ></img>
+	<img id="b19" onclick="send(19)" src="static/images/btn.png" ></img>
+	<img id="b20" onclick="send(20)" src="static/images/btn.png" ></img>
+	<img id="b21" onclick="send(21)"  src="static/images/btn.png" ></img>
+	<img id="b22" onclick="send(22)" src="static/images/btn.png" ></img>
+	<img id="b23" onclick="send(23)" src="static/images/btn.png" ></img>
+	<img id="b24" onclick="send(24)" src="static/images/btn.png" ></img>
+	<img id="b25" onclick="send(25)" src="static/images/btn.png" ></img>
 </div>
 <script>
-
-    $(function(){
-
-		$("#b1").click(function(){
-                $.get("http://192.168.1.21:5570/msg?btn=0",function(data,status){
-                });
-                alert('1')
-		})
-        $("#b2").click(function(){
-            $.get("http://192.168.1.21:5570/msg?btn=1",function(data,status){
-            });
-            alert('2')
-        })
-        $("#b3").click(function(){
-            $.get("http://192.168.1.21:5570/msg?btn=2",function(data,status){
-            });
-            alert('3')
-        })
-
-    });
+	function send(num) {
+        $.get("http://192.168.1.21:5570/msg?btn="+num,function(data,status){
+        });
+	}
 
 </script>
 </body>
