@@ -57,9 +57,10 @@ func MsgHandler(w http.ResponseWriter, req *http.Request) {
 
 }
 var connMap map[string]*websocket.Conn
-var conn *websocket.Conn
+
 func WsHandler(w http.ResponseWriter, req *http.Request) {
 	var upgrader = websocket.Upgrader{}
+	var conn *websocket.Conn
 	conn, _ = upgrader.Upgrade(w, req, nil)
 
 	defer conn.Close()
