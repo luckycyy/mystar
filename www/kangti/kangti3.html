@@ -17,8 +17,9 @@ background-attachment: fixed;"
 
 </div>
 <script>
-
-
+    var kt1ok=false;
+    var kt2ok=false;
+    var kt3ok=false;
     ws = new WebSocket("ws://192.168.1.21:5571/ws");
     ws.onopen = function(evt) {
         console.log("conn ok")
@@ -29,12 +30,22 @@ background-attachment: fixed;"
 
         if(evt.data=="31"){
             $("#kt31").show();
+            kt1ok=true;
         }
         if(evt.data=="32"){
             $("#kt32").show();
+            kt2ok=true;
         }
         if(evt.data=="33"){
             $("#kt33").show();
+            kt3ok=true;
+        }
+        if (kt1ok&&kt2ok&&kt3ok){
+            setTimeout(function(){
+                history.go(-1);
+            },2000)
+            $.get("http://192.168.1.21:5571/msg?v=3ok",function(data,status){
+            });//第3个屏幕ok
         }
 
         if(evt.data=="3f"){

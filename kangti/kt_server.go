@@ -3,6 +3,7 @@ import (
 	"net/http"
 	"log"
 	"github.com/gorilla/websocket"
+	"time"
 )
 
 func main() {
@@ -24,6 +25,7 @@ func MsgHandler(w http.ResponseWriter, req *http.Request) {
 		log.Println("v is:"+v)
 		if(v=="1ok"){
 			log.Println("gt_kt 1 ok")
+			time.Sleep(4*time.Second)
 			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.43&group=action_st&st=%E6%8A%95%E6%94%BE%E6%8A%97%E4%BD%93%E5%B7%A6%E8%BE%B9%E5%AE%8C%E6%88%90&user_action=true")
 			if err != nil {
 				print(err)
@@ -32,6 +34,7 @@ func MsgHandler(w http.ResponseWriter, req *http.Request) {
 			connMap["kt1"].WriteMessage(1, []byte("success"))
 		}else if(v=="2ok"){
 			log.Println("gt_kt 2 ok")
+			time.Sleep(4*time.Second)
 			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.43&group=action_st&st=%E6%8A%95%E6%94%BE%E6%8A%97%E4%BD%93%E4%B8%AD%E9%97%B4%E5%AE%8C%E6%88%90&user_action=true")
 			if err != nil {
 				print(err)
@@ -40,6 +43,7 @@ func MsgHandler(w http.ResponseWriter, req *http.Request) {
 			connMap["kt2"].WriteMessage(1, []byte("success"))
 		} else if(v=="3ok"){
 			log.Println("gt_kt 3 ok")
+			time.Sleep(4*time.Second)
 			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.43&group=action_st&st=%E6%8A%95%E6%94%BE%E6%8A%97%E4%BD%93%E5%8F%B3%E8%BE%B9%E5%AE%8C%E6%88%90&user_action=true")
 			if err != nil {
 				print(err)
