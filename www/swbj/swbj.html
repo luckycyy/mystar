@@ -1,0 +1,134 @@
+<
+<html>
+<head>
+    <script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+    </script>
+</head>
+<body background="static/images/bg.png"
+      style="background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+<div style="width: 100%" align="center">
+    <img id="myhead" src="static/images/head.gif"
+         style="position: absolute;left:18%;top: 15%;width: 70%;height: 60%;z-index: 999"></img>
+    <img id="btn_call" src="static/images/btn_call.png"
+         style="position: absolute;left:39%;top: 80%;width: 24%;height: 14%;z-index: 999"></img>
+    <img id="btn_uncall" src="static/images/btn_uncall.png"
+         style="display:none;position: absolute;left:39%;top: 80%;width: 24%;height: 14%;z-index: 999"></img>
+
+    <img id="note1" src="static/images/note1.png"
+         style="display:none;position: absolute;left:20%;top: 10%;width: 70%;height: 10%;"></img>
+    <img id="note2" src="static/images/note2.png"
+         style="display:none;position: absolute;left:20%;top: 22%;width: 70%;height: 10%;"></img>
+    <img id="note3" src="static/images/note3.png"
+         style="display:none;position: absolute;left:20%;top: 34%;width: 70%;height: 10%;"></img>
+    <img id="note4" src="static/images/note4.png"
+         style="display:none;position: absolute;left:20%;top: 46%;width: 70%;height: 10%;"></img>
+    <img id="note5" src="static/images/note5.png"
+         style="display:none;position: absolute;left:20%;top: 58%;width: 70%;height: 10%;"></img>
+    <img id="note6" src="static/images/note6.png"
+         style="display:none;position: absolute;left:20%;top: 70%;width: 70%;height: 10%;"></img>
+
+</div>
+<script>
+
+    $(function () {
+
+        $("#btn_call").click(function () {
+            console.log("call")
+            $("body").css("background-image", "url(static/images/calling_bg.gif)");
+            $("#myhead").hide()
+            $("#btn_call").hide()
+            $("#btn_uncall").show()
+            $.get("http://192.168.1.21:5573/swbj?v=btncall", function (data, status) {
+            });//触发剧情
+        })
+        $("#btn_uncall").click(function () {
+            // console.log("uncall")
+
+        })
+        var r1 = false
+        var r2 = false
+        var r3 = false
+        var r4 = false
+        var r5 = false
+        var r6 = false
+        $("#note1").click(function () {
+            $.get("http://192.168.1.21:5573/swbj?v=note1", function (data, status) {
+            });
+            $("#note1").attr('src',"static/images/note1r.png");
+            r1 = true
+        });
+        $("#note2").click(function () {
+            if(r1){
+                $.get("http://192.168.1.21:5573/swbj?v=note2", function (data, status) {
+                });
+                $("#note2").attr('src',"static/images/note2r.png");
+                r2 = true
+            }
+
+        });
+        $("#note3").click(function () {
+            if(r2) {
+                $.get("http://192.168.1.21:5573/swbj?v=note3", function (data, status) {
+                });
+                $("#note3").attr('src', "static/images/note3r.png");
+                r3 = true
+            }
+
+        });
+        $("#note4").click(function () {
+            if(r3) {
+                $.get("http://192.168.1.21:5573/swbj?v=note4", function (data, status) {
+                });
+                $("#note4").attr('src', "static/images/note4r.png");
+                r4 = true
+            }
+        });
+        $("#note5").click(function () {
+            if(r4) {
+                $.get("http://192.168.1.21:5573/swbj?v=note5", function (data, status) {
+                });
+                $("#note5").attr('src', "static/images/note5r.png");
+                r5 = true
+            }
+        });
+        $("#note6").click(function () {
+            if(r5) {
+                $.get("http://192.168.1.21:5573/swbj?v=note6", function (data, status) {
+                });
+                $("#note6").attr('src', "static/images/note6r.png");
+                r6 = true
+            }
+        });
+
+
+        ws = new WebSocket("ws://192.168.1.21:5573/wsquery");
+        ws.onopen = function (evt) {
+            console.log("conn ok")
+        }
+        ws.onmessage = function (evt) {
+            console.log(evt.data)
+            var val = evt.data
+            if (val == "end") {
+                $("body").css("background-image", "url(static/images/calling_bg.gif)");
+
+
+            } else if (val == "end") {
+                $("body").css("background-image", "url(static/images/note_bg.png)");
+                $("#note1").show()
+                $("#note2").show()
+                $("#note3").show()
+                $("#note4").show()
+                $("#note5").show()
+                $("#note6").show()
+            }
+
+
+        }
+        ws.onclose = function (evt) {
+            console.log("conn close")
+            history.go(-1);
+        }
+    })
+</script>
+</body>
+</html>
