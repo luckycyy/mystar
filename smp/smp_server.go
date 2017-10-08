@@ -491,6 +491,8 @@ func ChangeToRed(playerNum string) {
 		//完成逻辑处理
 		log.Println("red win")
 		redWinEvent()
+		myConnPool.sendBroadcast("JHD00=0\r\n")
+		myConnPool.sendBroadcast("ZDF00=6\r\n")
 	}
 }
 func ChangeToBlue(playerNum string) {
@@ -546,6 +548,8 @@ func ChangeJHDColor(jhdNum string, playerNum string) {
 			//完成逻辑处理
 			log.Println("blue win")
 			blueWinEvent()
+			myConnPool.sendBroadcast("JHD00=0\r\n")
+			myConnPool.sendBroadcast("ZDF00=6\r\n")
 		}
 	}
 	if _, ok := jhdTimerMap[playerNum]; ok {

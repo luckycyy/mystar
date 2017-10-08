@@ -22,6 +22,7 @@ func ButtonHandler(w http.ResponseWriter, req *http.Request) {
 		btn:=Btn{Btn:num}
 		jsonCurrentStatus, _ := json.Marshal(btn)
 		conn.WriteMessage(1, jsonCurrentStatus)
+		btnAudio()
 	}
 
 }
@@ -50,7 +51,11 @@ func WsQueryHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("finish.close conn")
 }
 
-
-/*音效
-http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.43&group=action_st&st=%E8%BD%AC%E6%8B%BC%E5%9B%BE%E9%9F%B3%E6%95%88&user_action=true
- */
+func btnAudio(){
+	log.Println("btnAudio finish")
+	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.43&group=action_st&st=%E8%BD%AC%E6%8B%BC%E5%9B%BE%E9%9F%B3%E6%95%88&user_action=true")
+	if err != nil {
+		print(err)
+	}
+	resp.Body.Close()
+}
