@@ -1,0 +1,62 @@
+
+<<html>
+<head>
+	<script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+	</script>
+</head>
+<body background="static/images/bg.png" style="background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+<div style="width: 100%" align="center">
+	<img id="bh1"  src="static/images/1.png"  style="position: absolute;left:9%;top: 15%;width: 26%;height: 16%;z-index: 999"  ></img>
+	<img id="bh2"  src="static/images/2.png"  style="position: absolute;left:39%;top: 15%;width: 26%;height: 16%;z-index: 999"></img>
+	<img id="bh3"  src="static/images/3.png"  style="position: absolute;left:69%;top: 15%;width: 26%;height: 16%;z-index: 999"></img>
+	<img id="bh4"  src="static/images/4.png"  style="position: absolute;left:9%;top: 36%;width: 26%;height: 16%;z-index: 999"  ></img>
+	<img id="bh5"  src="static/images/5.png"  style="position: absolute;left:39%;top: 36%;width: 26%;height: 16%;z-index: 999"  ></img>></img>
+	<img id="bh6"  src="static/images/6.png" style="position: absolute;left:69%;top: 36%;width: 26%;height: 16%;z-index: 999"  ></img>
+	<img id="bh7"  src="static/images/7.png" style="position: absolute;left:9%;top: 57%;width: 26%;height: 16%;z-index: 999" ></img>
+	<img id="bh8"  src="static/images/8.png"  style="position: absolute;left:39%;top: 57%;width: 26%;height: 16%;z-index: 999"  ></img>
+	<img id="bh9"  src="static/images/9.png" style="position: absolute;left:69%;top: 57%;width: 26%;height: 16%;z-index: 999"   ></img>
+
+	<img id="call"  src="static/images/call.png" style="position: absolute;left:39%;top: 76%;width: 26%;height: 16%;z-index: 999" ></img>
+
+</div>
+<script>
+
+    $(function(){
+		var num = "";
+        $("#bh1").click(function(){
+            console.log("1")
+			num+=1
+        })
+        $("#bh9").click(function(){
+            console.log("9")
+			num+=9
+        })
+        $("#call").click(function(){
+            console.log("call")
+            if(num=="911"){
+                console.log("ok")
+                $.get("http://192.168.1.21:5572/bohao?v=ok",function(data,status){
+                });
+                //成功后做什呢？？
+            }else{
+                //failed
+                console.log("failed")
+                $.get("http://192.168.1.21:5572/bohao?v=failed",function(data,status){
+                });
+                num=""
+			}
+        })
+
+        // $("#bh3").click(function(){
+        //     $.get("http://192.168.1.21:5569/dati?v=1true",function(data,status){
+        //     });
+        //
+        // })
+        // history.go(-1);
+
+
+    });
+
+</script>
+</body>
+</html>
