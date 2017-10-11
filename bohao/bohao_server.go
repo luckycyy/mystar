@@ -2,8 +2,6 @@ package main
 import (
 	"net/http"
 	"log"
-	"github.com/gorilla/websocket"
-	"encoding/json"
 )
 
 func main() {

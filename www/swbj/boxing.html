@@ -1,0 +1,228 @@
+<html>
+<head>
+    <script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+    </script>
+    <style>.marsk-container {
+        background: #FFFFFF;
+        display: none;
+        position: absolute;
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0px;
+        background: rgba(0, 0, 0, .5);
+        z-index: 10;
+    }</style>
+</head>
+
+<body background="static/images/audio_bg.png"
+      style="background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+
+<div style="width: 100%" align="center">
+
+    <img id="btn1" src="static/images/btn_up.png"
+         style="position: absolute;left:22.2%;top: 42%;width: 8%;height: 8%;z-index: 996"></img>
+    <img id="btn2" src="static/images/btn_up.png"
+         style="position: absolute;left:38.2%;top: 42%;width: 8%;height: 8%;z-index: 996"></img>
+    <img id="btn3" src="static/images/btn_up.png"
+         style="position: absolute;left:54.2%;top: 42%;width: 8%;height: 8%;z-index: 996"></img>
+    <img id="btn4" src="static/images/btn_up.png"
+         style="position: absolute;left:70.2%;top: 42%;width: 8%;height: 8%;z-index: 996"></img>
+
+    <img id="btn5" src="static/images/btn_down.png"
+         style="position: absolute;left:22.2%;top: 76%;width:8%;height: 8%;z-index: 996"></img>
+    <img id="btn6" src="static/images/btn_down.png"
+         style="position: absolute;left:38.2%;top: 76%;width: 8%;height: 8%;z-index: 996"></img>
+    <img id="btn7" src="static/images/btn_down.png"
+         style="position: absolute;left:54.2%;top: 76%;width: 8%;height: 8%;z-index: 996"></img>
+    <img id="btn8" src="static/images/btn_down.png"
+         style="position: absolute;left:70.2%;top: 76%;width: 8%;height: 8%;z-index: 996"></img>
+
+    <img id="part1" src="static/images/boxing1.png"
+         style="position: absolute;left:21.5%;top: 54%;width: 9.5%;height: 18%;z-index: 996"></img>
+    <img id="part2" src="static/images/boxing1.png"
+         style="position: absolute;left:37.5%;top: 54%;width: 9.5%;height: 18%;z-index: 996"></img>
+    <img id="part3" src="static/images/boxing1.png"
+         style="position: absolute;left:53.5%;top: 54%;width: 9.5%;height: 18%;z-index: 996"></img>
+    <img id="part4" src="static/images/boxing1.png"
+         style="position: absolute;left:69.5%;top: 54%;width: 9.5%;height: 18%;z-index: 996"></img>
+
+    <img id="start" src="static/images/poyi_start.png"
+         style="position: absolute;left:40.5%;top: 21%;width: 19%;height: 18%;z-index: 996"></img>
+
+</div>
+        <img id="poyi_success" src="static/images/poyi_success.png"
+             style="display:none;position: absolute;width: 100%;height: 100%;z-index: 999"></img>
+<img id="poyi_failed" src="static/images/poyi_failed.png"
+     style="display:none;position: absolute;width: 100%;height: 100%;z-index: 999"></img>
+
+
+</body>
+<script>
+
+    $(function () {
+        //开始破译
+        $("#start").click(function (event) {
+            v=""+index1+index2+index3+index4
+            if(v=="2310"){
+                $("#poyi_success").show();
+                //破译成功触发播放视频
+                $.get("http://192.168.1.21:5573/swbj?v=poyisuccess", function (data, status) {
+                });
+            }else{
+                $("#poyi_failed").show();
+                $.get("http://192.168.1.21:5573/swbj?v=poyifailed", function (data, status) {
+                });
+            }
+
+        });
+        $("#poyi_success").click(function (event) {
+            $("#poyi_success").hide();
+        });
+        $("#poyi_failed").click(function (event) {
+            $("#poyi_failed").hide()
+        });
+
+
+        var partsSrc=new Array("static/images/boxing1.png","static/images/boxing2.png","static/images/boxing3.png","static/images/boxing4.png")
+        var random1 = parseInt(Math.random()*4,10);
+        var random2 = parseInt(Math.random()*4,10);
+        var random3 = parseInt(Math.random()*4,10);
+        var random4 = parseInt(Math.random()*4,10);
+        $("#part1").attr('src', partsSrc[random1]);
+        $("#part2").attr('src', partsSrc[random2]);
+        $("#part3").attr('src', partsSrc[random3]);
+        $("#part4").attr('src', partsSrc[random4]);
+        var index1=random1;
+        var index2=random2;
+        var index3=random3;
+        var index4=random4;
+        var time1
+        var time2
+        var time3
+        var time4
+        $("#btn1").click(function () {
+            clearTimeout(time1)
+            index1++
+            if(index1>3){
+                index1=0;
+            }
+            console.log(index1)
+            $("#part1").fadeOut(1000)
+            time1=setTimeout(function () {
+                $("#part1").attr('src', partsSrc[index1]);
+                $.get("http://192.168.1.21:5573/swbj?v=boxingchange", function (data, status) {});
+                $("#part1").fadeIn(1000)
+            },1000)
+        })
+        $("#btn5").click(function () {
+            clearTimeout(time1)
+            index1--
+            if(index1<0){
+                index1=3;
+            }
+            console.log(index1)
+            $("#part1").fadeOut(1000)
+            time1=setTimeout(function () {
+                $("#part1").attr('src', partsSrc[index1]);
+                $.get("http://192.168.1.21:5573/swbj?v=boxingchange", function (data, status) {});
+                $("#part1").fadeIn(1000)
+            },1000)
+        })
+
+
+
+        $("#btn2").click(function () {
+            clearTimeout(time2)
+            index2++
+            if(index2>3){
+                index2=0;
+            }
+            console.log(index2)
+            $("#part2").fadeOut(1000)
+            time2=setTimeout(function () {
+                $("#part2").attr('src', partsSrc[index2]);
+                $.get("http://192.168.1.21:5573/swbj?v=boxingchange", function (data, status) {});
+                $("#part2").fadeIn(1000)
+            },1000)
+        })
+        $("#btn6").click(function () {
+            clearTimeout(time2)
+            index2--
+            if(index2<0){
+                index2=3;
+            }
+            console.log(index2)
+            $("#part2").fadeOut(1000)
+            time2=setTimeout(function () {
+                $("#part2").attr('src', partsSrc[index2]);
+                $.get("http://192.168.1.21:5573/swbj?v=boxingchange", function (data, status) {});
+                $("#part2").fadeIn(1000)
+            },1000)
+        })
+
+        $("#btn3").click(function () {
+            clearTimeout(time3)
+            index3++
+            if(index3>3){
+                index3=0;
+            }
+            console.log(index3)
+            $("#part3").fadeOut(1000)
+            time3=setTimeout(function () {
+                $("#part3").attr('src', partsSrc[index3]);
+                $.get("http://192.168.1.21:5573/swbj?v=boxingchange", function (data, status) {});
+                $("#part3").fadeIn(1000)
+            },1000)
+        })
+        $("#btn7").click(function () {
+            clearTimeout(time3)
+            index3--
+            if(index3<0){
+                index3=3;
+            }
+            console.log(index3)
+            $("#part3").fadeOut(1000)
+            time3=setTimeout(function () {
+                $("#part3").attr('src', partsSrc[index3]);
+                $.get("http://192.168.1.21:5573/swbj?v=boxingchange", function (data, status) {});
+                $("#part3").fadeIn(1000)
+            },1000)
+        })
+
+        $("#btn4").click(function () {
+            clearTimeout(time4)
+            index4++
+            if(index4>3){
+                index4=0;
+            }
+            console.log(index4)
+            $("#part4").fadeOut(1000)
+            time4=setTimeout(function () {
+                $("#part4").attr('src', partsSrc[index4]);
+                $.get("http://192.168.1.21:5573/swbj?v=boxingchange", function (data, status) {});
+                $("#part4").fadeIn(1000)
+            },1000)
+        })
+        $("#btn8").click(function () {
+            clearTimeout(time4)
+            index4--
+            if(index4<0){
+                index4=3;
+            }
+            console.log(index4)
+            $("#part4").fadeOut(1000)
+            time4=setTimeout(function () {
+                $("#part4").attr('src', partsSrc[index4]);
+                $.get("http://192.168.1.21:5573/swbj?v=boxingchange", function (data, status) {});
+                $("#part4").fadeIn(1000)
+            },1000)
+        })
+
+
+    });
+
+</script>
+
+</html>

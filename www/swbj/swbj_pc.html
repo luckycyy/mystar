@@ -1,0 +1,77 @@
+<
+<html>
+<head>
+    <script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+    </script>
+</head>
+<body background="static/images/xk_bg.png"
+      style="background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+<div style="width: 100%" align="center">
+
+    <img id="btn_xk1" src="static/images/btn_xk1.png"
+         style="position: absolute;left:8%;top: 28%;width: 24%;height: 56%;z-index: 999"></img>
+    <img id="btn_xk2" src="static/images/btn_xk2.png"
+         style="position: absolute;left:35%;top: 10%;width: 16%;height: 38%;z-index: 999"></img>
+
+    <img id="btn_xk3" src="static/images/btn_xk3.png"
+         style="position: absolute;left:37%;top: 54%;width: 26%;height: 34%;"></img>
+    <img id="btn_xk4" src="static/images/btn_xk4.png"
+         style="position: absolute;left:54%;top: 18%;width: 23%;height: 30%;"></img>
+
+
+
+
+</div>
+<script>
+
+    $(function () {
+        var gamefinish=false;
+        $("#btn_xk1").click(function () {
+            console.log("btn_xk1 click")
+            if(gamefinish){ return }
+            $("#btn_xk1").attr('src', "static/images/btn_xk1_down.png");
+            $.get("http://192.168.1.21:5573/swbj?v=huakuang1click", function (data, status) {
+            });
+        })
+        $("#btn_xk2").click(function () {
+            console.log("btn_xk2 click")
+            if(gamefinish){ return }
+            $("#btn_xk2").attr('src', "static/images/btn_xk2_down.png");
+            $.get("http://192.168.1.21:5573/swbj?v=huakuang2click", function (data, status) {
+            });
+        })
+        $("#btn_xk3").click(function () {
+            console.log("btn_xk3 click")
+            if(gamefinish){ return }
+            $("#btn_xk3").attr('src', "static/images/btn_xk3_down.png");
+            $.get("http://192.168.1.21:5573/swbj?v=huakuang3click", function (data, status) {
+            });
+        })
+        $("#btn_xk4").click(function () {
+            console.log("btn_xk4 click")
+            if(gamefinish){ return }
+            $("#btn_xk4").attr('src', "static/images/btn_xk4_down.png");
+            $.get("http://192.168.1.21:5573/swbj?v=huakuang4click", function (data, status) {
+            });
+        })
+
+
+        ws = new WebSocket("ws://192.168.1.21:5573/wsquerygamestatus");
+        ws.onopen = function (evt) {
+            console.log("conn ok")
+        }
+        ws.onmessage = function (evt) {
+            console.log(evt.data)
+            var val = evt.data
+            if (val == "gamefinish") {
+                gamefinish=true
+            }
+        }
+        ws.onclose = function (evt) {
+            console.log("conn close")
+            history.go(-1);
+        }
+    })
+</script>
+</body>
+</html>

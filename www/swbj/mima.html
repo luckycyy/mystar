@@ -1,0 +1,91 @@
+
+<<html>
+<head>
+	<script src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+	</script>
+</head>
+<body background="static/images/mima_bg.png" style="background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+<div style="width: 100%" align="center">
+
+	<img id="mm1"  src="static/images/mima_btn1.png"  style="position: absolute;left:41.5%;top: 51%;width: 5%;height: 6%;z-index: 999"  ></img>
+	<img id="mm2"  src="static/images/mima_btn2.png"  style="position: absolute;left:47.5%;top: 51%;width: 5%;height: 6%;z-index: 999"></img>
+	<img id="mm3"  src="static/images/mima_btn3.png"  style="position: absolute;left:53.5%;top: 51%;width: 5%;height: 6%;z-index: 999"></img>
+	<img id="mm4"  src="static/images/mima_btn4.png"  style="position: absolute;left:41.5%;top: 60%;width: 5%;height: 6%;z-index: 999"  ></img>
+	<img id="mm5"  src="static/images/mima_btn5.png"  style="position: absolute;left:47.5%;top: 60%;width: 5%;height: 6%;z-index: 999"  ></img>></img>
+	<img id="mm6"  src="static/images/mima_btn6.png" style="position: absolute;left:53.5%;top: 60%;width: 5%;height: 6%;z-index: 999"  ></img>
+	<img id="mm7"  src="static/images/mima_btn7.png" style="position: absolute;left:41.5%;top: 69%;width: 5%;height: 6%;z-index: 999" ></img>
+	<img id="mm8"  src="static/images/mima_btn8.png"  style="position: absolute;left:47.5%;top: 69%;width: 5%;height: 6%;z-index: 999"  ></img>
+	<img id="mm9"  src="static/images/mima_btn9.png" style="position: absolute;left:53.5%;top: 69%;width: 5%;height: 6%;z-index: 999"   ></img>
+	<img id="mm0"  src="static/images/mima_btn0.png"  style="position: absolute;left:41.5%;top: 77%;width: 11%;height: 6%;z-index: 999"  ></img>
+	<img id="enter"  src="static/images/mima_btn_enter.png" style="position: absolute;left:53.5%;top: 77%;width: 5%;height: 6%;z-index: 999" ></img>
+
+</div>
+<script>
+
+    $(function(){
+		var num = "";
+        $("#mm1").click(function(){
+            console.log("1")
+			num+=1
+        })
+        $("#mm2").click(function(){
+            console.log("2")
+            num+=2
+        })
+        $("#mm3").click(function(){
+            console.log("3")
+            num+=3
+        })
+        $("#mm4").click(function(){
+            console.log("4")
+            num+=4
+        })
+        $("#mm5").click(function(){
+            console.log("5")
+            num+=5
+        })
+        $("#mm6").click(function(){
+            console.log("6")
+            num+=6
+        })
+        $("#mm7").click(function(){
+            console.log("7")
+            num+=7
+        })
+        $("#mm8").click(function(){
+            console.log("8")
+            num+=8
+        })
+        $("#mm9").click(function(){
+            console.log("9")
+            num+=9
+        })
+        $("#mm0").click(function(){
+            console.log("0")
+			num+=0
+        })
+        $("#enter").click(function(){
+            console.log("enter")
+            if(num=="19860228"){
+                console.log("ok")
+                $.get("http://192.168.1.21:5573/swbj?v=mimasuccess", function (data, status) {});
+                location.href="boxing.html"
+            }else{
+                //failed
+                $.get("http://192.168.1.21:5573/swbj?v=mimafailed", function (data, status) {});
+                console.log("failed")
+                $("body").css("background-image", "url(static/images/mima_bg_err.png)");
+                setTimeout(function () {
+                    $("body").css("background-image", "url(static/images/mima_bg.png)");
+                },3000)
+                $.get("http://192.168.1.21:5574/mima?v=failed",function(data,status){
+                });
+                num=""
+			}
+        })
+
+    });
+
+</script>
+</body>
+</html>
