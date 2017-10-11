@@ -108,11 +108,7 @@
         ws.onmessage = function (evt) {
             console.log(evt.data)
             var val = evt.data
-            if (val == "end") {
-                $("body").css("background-image", "url(static/images/calling_bg.gif)");
-
-
-            } else if (val == "end") {
+            if (val == "juqingend") {
                 $("body").css("background-image", "url(static/images/note_bg.png)");
                 $("#note1").show()
                 $("#note2").show()
@@ -120,6 +116,15 @@
                 $("#note4").show()
                 $("#note5").show()
                 $("#note6").show()
+                $("#btn_uncall").hide()
+            } else if (val == "mobileend") {
+                $("body").css("background-image", "url(static/images/mobile_end.png)");
+                $("#note1").hide()
+                $("#note2").hide()
+                $("#note3").hide()
+                $("#note4").hide()
+                $("#note5").hide()
+                $("#note6").hide()
             }
 
 

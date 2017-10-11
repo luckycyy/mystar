@@ -30,9 +30,13 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 			resp.Body.Close()
 
 
-		}else if(val=="end"){
-			log.Println(" SwbjHandler v is end")
-			conn.WriteMessage(1, []byte("end"))
+		}else if(val=="juqingend"){
+			log.Println(" SwbjHandler v is juqingend")
+			conn.WriteMessage(1, []byte("juqingend"))
+
+		}else if(val=="mobileend"){
+			log.Println(" SwbjHandler v is mobileend")
+			conn.WriteMessage(1, []byte("mobileend"))
 
 		}else if(val=="note1"){
 			log.Println(" SwbjHandler v is note1")
