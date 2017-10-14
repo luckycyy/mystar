@@ -23,7 +23,7 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 			log.Println("  SwbjHandler v is btncall")
 
 			//修改为触发播放剧情的url
-			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E6%9F%AF%E5%8D%97-%E6%8B%A8%E9%80%9A110%E7%94%B5%E8%AF%9D&user_action=true")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E6%8E%A5%E9%80%9A%E7%94%B5%E8%AF%9D&user_action=true")
 			if err != nil {
 				print(err)
 			}
@@ -40,42 +40,42 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 
 		}else if(val=="note1"){
 			log.Println(" SwbjHandler v is note1")
-			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E6%9F%AF%E5%8D%97-%E6%8B%A8%E9%80%9A110%E7%94%B5%E8%AF%9D&user_action=true")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%AC%AC%E4%B8%80%E6%9D%A1%E7%95%99%E8%A8%80&user_action=true")
 			if err != nil {
 				print(err)
 			}
 			resp.Body.Close()
 		}else if(val=="note2"){
 			log.Println(" SwbjHandler v is note2")
-			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E6%9F%AF%E5%8D%97-%E6%8B%A8%E9%80%9A110%E7%94%B5%E8%AF%9D&user_action=true")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%AC%AC%E4%BA%8C%E6%9D%A1%E7%95%99%E8%A8%80&user_action=true")
 			if err != nil {
 				print(err)
 			}
 			resp.Body.Close()
 		}else if(val=="note3"){
 			log.Println(" SwbjHandler v is note3")
-			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E6%9F%AF%E5%8D%97-%E6%8B%A8%E9%80%9A110%E7%94%B5%E8%AF%9D&user_action=true")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%AC%AC%E4%B8%89%E6%9D%A1%E7%95%99%E8%A8%80&user_action=true")
 			if err != nil {
 				print(err)
 			}
 			resp.Body.Close()
 		}else if(val=="note4"){
 			log.Println(" SwbjHandler v is note4")
-			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E6%9F%AF%E5%8D%97-%E6%8B%A8%E9%80%9A110%E7%94%B5%E8%AF%9D&user_action=true")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%AC%AC%E5%9B%9B%E6%9D%A1%E7%95%99%E8%A8%80&user_action=true")
 			if err != nil {
 				print(err)
 			}
 			resp.Body.Close()
 		}else if(val=="note5"){
 			log.Println(" SwbjHandler v is note5")
-			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E6%9F%AF%E5%8D%97-%E6%8B%A8%E9%80%9A110%E7%94%B5%E8%AF%9D&user_action=true")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%AC%AC%E4%BA%94%E6%9D%A1%E7%95%99%E8%A8%80&user_action=true")
 			if err != nil {
 				print(err)
 			}
 			resp.Body.Close()
 		}else if(val=="note6"){
 			log.Println(" SwbjHandler v is note6")
-			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E6%9F%AF%E5%8D%97-%E6%8B%A8%E9%80%9A110%E7%94%B5%E8%AF%9D&user_action=true")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%AC%AC%E5%85%AD%E6%9D%A1%E7%95%99%E8%A8%80&user_action=true")
 			if err != nil {
 				print(err)
 			}
@@ -121,7 +121,7 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 			resp.Body.Close()
 		}else if(val=="huakuang4click"){
 			log.Println(" SwbjHandler v is huakuang4click")
-			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%82%B9%E5%87%BB%E7%94%BB%E6%A1%86%E5%9B%9B&user_action=true")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%82%B9%E5%87%BB%E7%94%BB%E6%A1%86%E4%B8%80&user_action=true")
 			if err != nil {
 				print(err)
 			}
@@ -142,7 +142,7 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 			resp.Body.Close()
 		}else if(val=="huakuang1click"){
 			log.Println(" SwbjHandler v is huakuang1click")
-			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%82%B9%E5%87%BB%E7%94%BB%E6%A1%86%E4%B8%80&user_action=true")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%82%B9%E5%87%BB%E7%94%BB%E6%A1%86%E5%9B%9B&user_action=true")
 			if err != nil {
 				print(err)
 			}
