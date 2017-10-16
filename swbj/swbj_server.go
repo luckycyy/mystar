@@ -9,6 +9,7 @@ func main() {
 	http.HandleFunc("/swbj", SwbjHandler)
 	http.HandleFunc("/wsquery", WsQueryHandler)
 	http.HandleFunc("/wsquerygamestatus", WsQueryGameStatusHandler)
+	http.HandleFunc("/wsqueryjgcy", WsQueryJgcyHandler)
 	http.Handle("/", http.FileServer(http.Dir("/opt/project/go_server/www")))
 	log.Print("server running.")
 	http.ListenAndServe(":5573", nil)
@@ -147,7 +148,26 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 				print(err)
 			}
 			resp.Body.Close()
+		}else if(val=="jgcy_start"){
+			jgcy_start=true
+			log.Println(" SwbjHandler v is jgcy_start true")
+			connJgcy.WriteMessage(1, []byte("jgcy_start"))
+		}else if(val=="jgcy_end"){
+			jgcy_start=false
+			log.Println(" SwbjHandler v is jgcy_start false")
+			connJgcy.WriteMessage(1, []byte("jgcy_end"))
+		}else if(val=="jgcy_event"){
+			log.Println(" SwbjHandler v is jgcy_event ")
+			connJgcy.WriteMessage(1, []byte("jgcy_event"))
+		}else if(val=="jgcy_failed"){
+			log.Println(" SwbjHandler v is jgcy_failed ")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&amp;st=%E7%AC%94%E8%AE%B0-%E7%A9%BF%E8%B6%8A%E6%97%B6%E9%97%B4%E7%94%A8%E5%AE%8C&user_action=true")
+			if err != nil {
+				print(err)
+			}
+			resp.Body.Close()
 		}
+
 	}
 
 }
@@ -193,4 +213,31 @@ func WsQueryGameStatusHandler(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	log.Println("finish.close conn2")
+}
+
+
+var jgcy_start bool
+var connJgcy *websocket.Conn
+func WsQueryJgcyHandler(w http.ResponseWriter, req *http.Request) {
+	var upgrader = websocket.Upgrader{}
+	connJgcy, _ = upgrader.Upgrade(w, req, nil)
+	if jgcy_start {
+		connJgcy.WriteMessage(1,[]byte("jgcy_start"))
+	}else{
+		connJgcy.WriteMessage(1,[]byte("jgcy_end"))
+	}
+	defer connJgcy.Close()
+	for {
+		_, msg, _ := connJgcy.ReadMessage()
+		if string(msg) == "success" {
+			log.Println("SwbjHandler finish")
+			//	resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.43&group=action_st&st=%E6%89%8B%E6%9C%BA%E7%BB%88%E7%AB%AF%E6%8B%BC%E5%9B%BE%E6%B8%B8%E6%88%8F%E5%AE%8C%E6%88%90&user_action=true")
+			//	if err != nil {
+			//		print(err)
+			//	}
+			//	resp.Body.Close()
+			//	break
+		}
+	}
+	log.Println("finish.close connJgcy")
 }
