@@ -3,6 +3,7 @@ import (
 	"net/http"
 	"log"
 	"github.com/gorilla/websocket"
+	"strconv"
 )
 
 func main() {
@@ -15,6 +16,7 @@ func main() {
 	http.ListenAndServe(":5573", nil)
 }
 
+var xiangkuang_start bool
 func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 	log.Println("into SwbjHandler")
 	req.ParseForm()
@@ -106,6 +108,13 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 				print(err)
 			}
 			resp.Body.Close()
+		}else if(val=="mimaaudio"){
+			log.Println(" SwbjHandler v is mimaaudio")
+			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%94%B5%E8%84%91%E5%AF%86%E7%A0%81%E9%9F%B3%E6%95%88&user_action=true")
+			if err != nil {
+				print(err)
+			}
+			resp.Body.Close()
 		}else if(val=="mimasuccess"){
 			log.Println(" SwbjHandler v is mimasuccess")
 			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%94%B5%E8%84%91%E5%B1%8F%E5%B9%95%E5%AF%86%E7%A0%81%E6%AD%A3%E7%A1%AE&user_action=true")
@@ -120,6 +129,15 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 				print(err)
 			}
 			resp.Body.Close()
+		}else if(val=="huakuang_start"){
+			log.Println(" SwbjHandler v is huakuangstart")
+			xiangkuang_start=true
+		}else if(val=="huakuang_end"){
+			log.Println(" SwbjHandler v is huakuangend")
+			xiangkuang_start=false
+		}else if(val=="huakuang_status"){
+			log.Println(" SwbjHandler v is huakuang_status")
+			w.Write([]byte(strconv.FormatBool(xiangkuang_start)))
 		}else if(val=="huakuang4click"){
 			log.Println(" SwbjHandler v is huakuang4click")
 			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&st=%E7%AC%94%E8%AE%B0-%E7%82%B9%E5%87%BB%E7%94%BB%E6%A1%86%E4%B8%80&user_action=true")

@@ -20,16 +20,53 @@
 	<img id="call"  src="static/images/call.png" style="position: absolute;left:69%;top: 76%;width: 26%;height: 16%;z-index: 999" ></img>
 
 </div>
+<img id="end" src="static/images/bohao_end.jpg"
+	 style="display: none;"></img>
 <script>
 
     $(function(){
+        $.get("http://192.168.1.21:5572/bohao?v=bohao_status", function (data, status) {
+            if (data=="true") {
+                $("body").css("background-image", "url(static/images/bg.png)");
+                $("#bh0").show()
+                $("#bh1").show()
+                $("#bh2").show()
+                $("#bh3").show()
+                $("#bh4").show()
+                $("#bh5").show()
+                $("#bh6").show()
+                $("#bh7").show()
+                $("#bh8").show()
+                $("#bh9").show()
+                $("#call").show()
+            }else if(data=="false"){
+                $("body").css("background-image", "url(static/images/bohao_end.jpg)");
+                $("#bh0").hide()
+                $("#bh1").hide()
+                $("#bh2").hide()
+                $("#bh3").hide()
+                $("#bh4").hide()
+                $("#bh5").hide()
+                $("#bh6").hide()
+                $("#bh7").hide()
+                $("#bh8").hide()
+                $("#bh9").hide()
+                $("#call").hide()
+            }
+        });
+
+
 		var num = "";
         $("#bh1").click(function(){
             console.log("1")
+            $.get("http://192.168.1.21:5572/bohao?v=audio", function (data, status) {
+            });
 			num+=1
         })
         $("#bh0").click(function(){
             console.log("0")
+            $.get("http://192.168.1.21:5572/bohao?v=audio", function (data, status) {
+            });
 			num+=0
         })
         $("#call").click(function(){

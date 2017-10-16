@@ -17,7 +17,8 @@
          style="position: absolute;left:37%;top: 54%;width: 26%;height: 34%;"></img>
     <img id="btn_xk4" src="static/images/btn_xk4.png"
          style="position: absolute;left:54%;top: 18%;width: 23%;height: 30%;"></img>
-
+    <img id="wait" src="static/images/jg_wait.gif"
+         style="display: none;"></img>
 
 
 
@@ -25,6 +26,21 @@
 <script>
 
     $(function () {
+        $.get("http://192.168.1.21:5573/swbj?v=huakuang_status", function (data, status) {
+            if (data=="true") {
+                $("body").css("background-image", "url(static/images/xk_bg.png)");
+                $("#btn_xk1").show()
+                $("#btn_xk2").show()
+                $("#btn_xk3").show()
+                $("#btn_xk4").show()
+            }else if(data=="false"){
+                $("body").css("background-image", "url(static/images/jg_wait.gif)");
+                $("#btn_xk1").hide()
+                $("#btn_xk2").hide()
+                $("#btn_xk3").hide()
+                $("#btn_xk4").hide()
+            }
+        });
         var gamefinish=false;
         $("#btn_xk1").click(function () {
             console.log("btn_xk1 click")
