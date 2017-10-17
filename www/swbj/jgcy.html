@@ -8,18 +8,17 @@
       style="background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
 <img src="static/images/jg_failed.gif"
      style="display:none;"></img>
-<img src="static/images/jg_wait.gif"
-     style="display:none;"></img>
+
 <style>
     .stimer {
         color: white;
-        font-size: 88px;
+        font-size: 55px;
         top: 65%;
         left: 43%;
         position: absolute;
     }
 </style>
-<span id="stimer" class="time_wrap stimer">5.0秒</span>
+<span id="stimer" class="time_wrap stimer">10.0秒</span>
 <script>
 
     ws = new WebSocket("ws://192.168.1.21:5573/wsqueryjgcy");
@@ -29,14 +28,15 @@
     ws.onmessage = function (evt) {
         console.log(evt.data)
         var val = evt.data
-        if (val == "jgcy_start") {
-            $("body").css("background-image", "url(static/images/jg_bg.gif)");
-            $(".time_wrap").show()
-        }else if(val == "jgcy_end"){
-            $("body").css("background-image", "url(static/images/jg_wait.gif)");
+        if(val == "jgcy_failed"){
+            clearInterval(timer)
+            $("body").css("background-image", "url(static/images/jg_failed.gif)");
             $(".time_wrap").hide()
         }else if(val == "jgcy_event"){
             startTimer()
+        }else if(val == "jgcy_success"){
+            console.log("jgcy_success")
+            history.go(-1);
         }
         ws.onclose = function (evt) {
             console.log("conn close")
@@ -44,12 +44,14 @@
         }
     }
 
+
         var timer
 
         function startTimer() {
             clearInterval(timer)
             $("body").css("background-image", "url(static/images/jg_bg.gif)");
-            var nMS = 5000
+            $(".time_wrap").show()
+            var nMS = 10000
             timer = setInterval(function () {
                 $(".time_wrap").each(function () {
                     var Obj = this;
@@ -65,7 +67,6 @@
                         console.log("jgcyfailed")
                         $.get("http://192.168.1.21:5573/swbj?v=jgcy_failed", function (data, status) {
                         });
-                        $("body").css("background-image", "url(static/images/jg_failed.gif)");
                     }
                 });
             }, 100);

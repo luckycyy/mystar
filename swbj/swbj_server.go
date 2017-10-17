@@ -167,16 +167,14 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 			}
 			resp.Body.Close()
 		}else if(val=="jgcy_start"){
-			jgcy_start=true
 			log.Println(" SwbjHandler v is jgcy_start true")
 			connJgcy.WriteMessage(1, []byte("jgcy_start"))
-		}else if(val=="jgcy_end"){
-			jgcy_start=false
-			log.Println(" SwbjHandler v is jgcy_start false")
-			connJgcy.WriteMessage(1, []byte("jgcy_end"))
 		}else if(val=="jgcy_event"){
 			log.Println(" SwbjHandler v is jgcy_event ")
 			connJgcy.WriteMessage(1, []byte("jgcy_event"))
+		}else if(val=="jgcy_success"){
+			log.Println(" SwbjHandler v is jgcy_success ")
+			connJgcy.WriteMessage(1, []byte("jgcy_success"))
 		}else if(val=="jgcy_failed"){
 			log.Println(" SwbjHandler v is jgcy_failed ")
 			resp, err := http.Get("http://192.168.1.21:1235/jdq_status/report_st?ip=192.168.1.55&group=action_st&amp;st=%E7%AC%94%E8%AE%B0-%E7%A9%BF%E8%B6%8A%E6%97%B6%E9%97%B4%E7%94%A8%E5%AE%8C&user_action=true")
@@ -184,6 +182,7 @@ func SwbjHandler(w http.ResponseWriter, req *http.Request) {
 				print(err)
 			}
 			resp.Body.Close()
+			connJgcy.WriteMessage(1, []byte("jgcy_failed"))
 		}
 
 	}
@@ -234,16 +233,12 @@ func WsQueryGameStatusHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 
-var jgcy_start bool
+
 var connJgcy *websocket.Conn
 func WsQueryJgcyHandler(w http.ResponseWriter, req *http.Request) {
 	var upgrader = websocket.Upgrader{}
 	connJgcy, _ = upgrader.Upgrade(w, req, nil)
-	if jgcy_start {
-		connJgcy.WriteMessage(1,[]byte("jgcy_start"))
-	}else{
-		connJgcy.WriteMessage(1,[]byte("jgcy_end"))
-	}
+
 	defer connJgcy.Close()
 	for {
 		_, msg, _ := connJgcy.ReadMessage()
